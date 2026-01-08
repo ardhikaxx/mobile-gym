@@ -544,7 +544,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       height: 130,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        gradient: LinearGradient(
+                        gradient: const LinearGradient(
                           colors: [
                             PurplePalette.orchid,
                             PurplePalette.lavender,
@@ -572,7 +572,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     const SizedBox(height: 8),
                     Text(
                       _fotoProfile != null ? "Ubah Foto" : "Tambahkan Foto",
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: PurplePalette.lavender,
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -644,7 +644,7 @@ class _RegisterPageState extends State<RegisterPage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   "Jenis Kelamin *",
                   style: TextStyle(
                     color: PurplePalette.textPrimary,
@@ -729,7 +729,7 @@ class _RegisterPageState extends State<RegisterPage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   "Golongan Darah",
                   style: TextStyle(
                     color: PurplePalette.textPrimary,
@@ -752,15 +752,15 @@ class _RegisterPageState extends State<RegisterPage> {
                       value: _golonganDarah,
                       isExpanded: true,
                       dropdownColor: PurplePalette.cardBackground,
-                      icon: Padding(
-                        padding: const EdgeInsets.only(right: 12),
+                      icon: const Padding(
+                        padding: EdgeInsets.only(right: 12),
                         child: Icon(
                           FontAwesomeIcons.chevronDown,
                           color: PurplePalette.textSecondary,
                           size: 18,
                         ),
                       ),
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: PurplePalette.textPrimary,
                         fontSize: 16,
                       ),
@@ -877,7 +877,7 @@ class _RegisterPageState extends State<RegisterPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
+                  const Text(
                     "Sudah punya akun?",
                     style: TextStyle(
                       color: PurplePalette.textSecondary,
@@ -887,7 +887,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   TextButton(
                     onPressed: () =>
                         Navigator.pushReplacementNamed(context, '/login'),
-                    child: Text(
+                    child: const Text(
                       "Masuk",
                       style: TextStyle(
                         color: PurplePalette.lavender,
@@ -921,7 +921,7 @@ class _RegisterPageState extends State<RegisterPage> {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             color: PurplePalette.textPrimary,
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -933,7 +933,7 @@ class _RegisterPageState extends State<RegisterPage> {
           validator: validator,
           keyboardType: keyboardType,
           maxLines: maxLines,
-          style: TextStyle(color: PurplePalette.textPrimary),
+          style: const TextStyle(color: PurplePalette.textPrimary),
           decoration: InputDecoration(
             filled: true,
             fillColor: PurplePalette.cardBackground,
@@ -952,7 +952,7 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(
+              borderSide: const BorderSide(
                 color: PurplePalette.accent,
                 width: 2,
               ),
@@ -990,7 +990,7 @@ class _RegisterPageState extends State<RegisterPage> {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             color: PurplePalette.textPrimary,
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -1001,7 +1001,7 @@ class _RegisterPageState extends State<RegisterPage> {
           controller: controller,
           obscureText: obscureText,
           validator: validator,
-          style: TextStyle(color: PurplePalette.textPrimary),
+          style: const TextStyle(color: PurplePalette.textPrimary),
           decoration: InputDecoration(
             filled: true,
             fillColor: PurplePalette.cardBackground,
@@ -1009,7 +1009,7 @@ class _RegisterPageState extends State<RegisterPage> {
             hintStyle: TextStyle(
               color: PurplePalette.textSecondary.withOpacity(0.7),
             ),
-            prefixIcon: Icon(
+            prefixIcon: const Icon(
               FontAwesomeIcons.lock,
               color: PurplePalette.textSecondary,
               size: 20,
@@ -1028,7 +1028,7 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(
+              borderSide: const BorderSide(
                 color: PurplePalette.accent,
                 width: 2,
               ),

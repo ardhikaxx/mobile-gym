@@ -170,12 +170,12 @@ class _LoginPageState extends State<LoginPage> {
       child: Container(
         padding: const EdgeInsets.all(50),
         color: Colors.white,
-        child: Column(
+        child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Icon(Icons.fitness_center, color: PurplePalette.accent, size: 80),
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
             Text(
               "GYM GENZ",
               style: TextStyle(
@@ -184,7 +184,7 @@ class _LoginPageState extends State<LoginPage> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             Text(
               "Gym adalah tempat untuk melatih kekuatan fisik, "
               "meningkatkan kesehatan, membentuk tubuh, dan "
@@ -214,7 +214,7 @@ class _LoginPageState extends State<LoginPage> {
               decoration: BoxDecoration(
                 color: PurplePalette.accent,
                 borderRadius: BorderRadius.circular(20),
-                gradient: LinearGradient(
+                gradient: const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
@@ -238,7 +238,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 20),
             // Judul
-            Text(
+            const Text(
               "Selamat Datang",
               style: TextStyle(
                 color: PurplePalette.textPrimary,
@@ -249,7 +249,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 8),
             // Subjudul
-            Text(
+            const Text(
               "Kembali berlatih, kembali kuat.",
               style: TextStyle(
                 color: PurplePalette.textSecondary,
@@ -262,7 +262,7 @@ class _LoginPageState extends State<LoginPage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   "Email",
                   style: TextStyle(
                     color: PurplePalette.textPrimary,
@@ -273,14 +273,14 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: emailController,
-                  style: TextStyle(color: PurplePalette.textPrimary),
+                  style: const TextStyle(color: PurplePalette.textPrimary),
                   validator: _validateEmail,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: PurplePalette.cardBackground,
                     hintText: "Masukkan Email",
                     hintStyle: TextStyle(color: PurplePalette.textSecondary.withOpacity(0.7)),
-                    prefixIcon: Icon(
+                    prefixIcon: const Icon(
                       FontAwesomeIcons.envelope,
                       color: PurplePalette.textSecondary,
                       size: 20,
@@ -291,7 +291,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide(color: PurplePalette.accent, width: 2),
+                      borderSide: const BorderSide(color: PurplePalette.accent, width: 2),
                     ),
                     errorBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -322,14 +322,14 @@ class _LoginPageState extends State<LoginPage> {
                 TextFormField(
                   controller: passwordController,
                   obscureText: _obscure,
-                  style: TextStyle(color: PurplePalette.textPrimary),
+                  style: const TextStyle(color: PurplePalette.textPrimary),
                   validator: _validatePassword,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: PurplePalette.cardBackground,
                     hintText: "Masukkan password Anda",
                     hintStyle: TextStyle(color: PurplePalette.textSecondary.withOpacity(0.7)),
-                    prefixIcon: Icon(
+                    prefixIcon: const Icon(
                       FontAwesomeIcons.lock,
                       color: PurplePalette.textSecondary,
                       size: 20,
@@ -350,7 +350,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide(color: PurplePalette.accent, width: 2),
+                      borderSide: const BorderSide(color: PurplePalette.accent, width: 2),
                     ),
                     errorBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -369,7 +369,7 @@ class _LoginPageState extends State<LoginPage> {
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14),
-                gradient: LinearGradient(
+                gradient: const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
@@ -426,8 +426,8 @@ class _LoginPageState extends State<LoginPage> {
                     thickness: 1,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12),
                   child: Text(
                     "Atau login dengan",
                     style: TextStyle(
@@ -463,7 +463,7 @@ class _LoginPageState extends State<LoginPage> {
                 width: 24,
                 height: 24,
               ),
-              label: Text(
+              label: const Text(
                 "Google",
                 style: TextStyle(
                   color: Colors.black,
@@ -485,7 +485,7 @@ class _LoginPageState extends State<LoginPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
+                const Text(
                   "Belum punya akun? ",
                   style: TextStyle(
                     color: PurplePalette.textSecondary,
@@ -496,7 +496,7 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed: _isLoading
                       ? null
                       : () => Navigator.pushReplacementNamed(context, '/register'),
-                  child: Text(
+                  child: const Text(
                     "Daftar sekarang",
                     style: TextStyle(
                       color: PurplePalette.lavender,

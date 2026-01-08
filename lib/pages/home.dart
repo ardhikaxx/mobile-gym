@@ -207,7 +207,7 @@ class _HomePageState extends State<HomePage> {
                               ? Container(
                                   width: 52,
                                   height: 52,
-                                  decoration: BoxDecoration(
+                                  decoration: const BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: PurplePalette.cardBackground,
                                   ),
@@ -439,7 +439,7 @@ class _HomePageState extends State<HomePage> {
                                     const SizedBox(height: 4),
                                     Text(
                                       challenge["subtitle"],
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         color: PurplePalette.textSecondary,
                                         fontSize: 14,
                                       ),
@@ -725,7 +725,7 @@ class _HomePageState extends State<HomePage> {
         const SizedBox(width: 6),
         Text(
           text,
-          style: TextStyle(
+          style: const TextStyle(
             color: PurplePalette.textSecondary,
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -805,7 +805,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Center(
+                    child: const Center(
                       child: Icon(
                         FontAwesomeIcons.dumbbell,
                         color: PurplePalette.textPrimary,

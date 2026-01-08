@@ -484,7 +484,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             color: PurplePalette.textPrimary,
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -495,7 +495,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
           controller: controller,
           obscureText: obscureText,
           validator: validator,
-          style: TextStyle(color: PurplePalette.textPrimary),
+          style: const TextStyle(color: PurplePalette.textPrimary),
           decoration: InputDecoration(
             filled: true,
             fillColor: PurplePalette.cardBackground,
@@ -522,7 +522,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(
+              borderSide: const BorderSide(
                 color: PurplePalette.accent,
                 width: 2,
               ),
@@ -562,7 +562,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
           Expanded(
             child: Text(
               text,
-              style: TextStyle(
+              style: const TextStyle(
                 color: PurplePalette.textSecondary,
                 fontSize: 12,
               ),
