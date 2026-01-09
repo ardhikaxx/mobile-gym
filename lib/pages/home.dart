@@ -911,8 +911,8 @@ class _HomePageState extends State<HomePage> {
                       ? _buildLoadingIndicator()
                       : _workoutChallenges.isEmpty
                           ? _buildEmptyState(
-                              'No Challenges Today',
-                              'All workouts are completed or in progress!',
+                              'Tidak Ada Workout Hari Ini',
+                              'Semua latihan telah selesai atau sedang berlangsung!',
                             )
                           : ListView.builder(
                               scrollDirection: Axis.horizontal,
@@ -1031,8 +1031,8 @@ class _HomePageState extends State<HomePage> {
                       ? _buildLoadingIndicator()
                       : _completedWorkouts.isEmpty
                           ? _buildEmptyState(
-                              'No History Today',
-                              'Complete your first workout to see it here!',
+                              'Tidak Ada Riwayat Hari Ini',
+                              'Selesaikan latihan pertama Anda untuk melihatnya di sini!',
                             )
                           : Column(
                               children: _completedWorkouts
