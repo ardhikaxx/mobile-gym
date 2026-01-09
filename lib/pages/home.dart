@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_application_1/service/auth_services.dart';
 import 'package:flutter_application_1/service/workout_services.dart';
 import 'package:flutter_application_1/utils/session_manager.dart';
+import 'package:flutter_application_1/pages/chatbot_screens.dart';
 
 class PurplePalette {
   static const Color lavender = Color(0xFFE39FF6);
@@ -706,6 +707,8 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: PurplePalette.background,
+      floatingActionButton: _buildChatbotFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endContained,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _refreshData,
@@ -1178,6 +1181,59 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ],
+    );
+  }
+
+  // Method untuk membuat floating button chatbot
+  Widget _buildChatbotFloatingButton() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20, right: 8),
+      child: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ChatbotScreens(),
+            ),
+          );
+        },
+        backgroundColor: PurplePalette.accent,
+        foregroundColor: Colors.white,
+        elevation: 8,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Container(
+          width: 56,
+          height: 56,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [
+                PurplePalette.orchid,
+                PurplePalette.accent,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: PurplePalette.orchid.withOpacity(0.5),
+                blurRadius: 15,
+                spreadRadius: 2,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: const Center(
+            child: Icon(
+              FontAwesomeIcons.solidMessage,
+              size: 24,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
