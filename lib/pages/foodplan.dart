@@ -531,12 +531,8 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
       appBar: AppBar(
         backgroundColor: PurplePalette.background,
         elevation: 0,
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back, color: PurplePalette.textPrimary),
-        ),
         title: const Text(
-          "Meal Plan Gym",
+          "FoodPlan Gym",
           style: TextStyle(
             color: PurplePalette.textPrimary,
             fontSize: 26,

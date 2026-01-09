@@ -427,10 +427,6 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
       appBar: AppBar(
         backgroundColor: PurplePalette.background,
         elevation: 0,
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back, color: PurplePalette.textPrimary),
-        ),
         title: const Text(
           "Jadwal Workout",
           style: TextStyle(
