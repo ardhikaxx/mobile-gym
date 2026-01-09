@@ -403,7 +403,7 @@ class _PengaturanPageState extends State<PengaturanPage> {
                           ? Container(
                               width: 80,
                               height: 80,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: PurplePalette.cardBackground,
                               ),
@@ -782,7 +782,7 @@ class _PengaturanPageState extends State<PengaturanPage> {
                         ),
                         SizedBox(width: 8),
                         Text(
-                          "App Version 2.4.0",
+                          "App Version 1.0.0",
                           style: TextStyle(
                             color: PurplePalette.textSecondary,
                             fontSize: 12,
@@ -968,11 +968,11 @@ class _PengaturanPageState extends State<PengaturanPage> {
             ),
           ],
         ),
-        content: Column(
+        content: const Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               "GYM GENZ",
               style: TextStyle(
                 color: PurplePalette.textPrimary,
@@ -980,21 +980,21 @@ class _PengaturanPageState extends State<PengaturanPage> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Text(
-              "Version: 2.4.0",
+              "Version: 1.0.0",
               style: TextStyle(
                 color: PurplePalette.textSecondary,
               ),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             Text(
-              "Developed by: Your Team",
+              "Developed by: Team GYM GENZ",
               style: TextStyle(
                 color: PurplePalette.textSecondary,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Text(
               "A modern fitness app for the new generation of gym enthusiasts.",
               style: TextStyle(
