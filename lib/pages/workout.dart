@@ -158,14 +158,14 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
   }
 
   Widget _buildLoadingState() {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(
             color: PurplePalette.orchid,
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           Text(
             'Memuat data workout...',
             style: TextStyle(
@@ -183,7 +183,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             FontAwesomeIcons.exclamationTriangle,
             color: PurplePalette.error,
             size: 64,
@@ -191,7 +191,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
           const SizedBox(height: 20),
           Text(
             _errorMessage,
-            style: TextStyle(
+            style: const TextStyle(
               color: PurplePalette.textPrimary,
               fontSize: 16,
               fontWeight: FontWeight.w500,
@@ -222,7 +222,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -231,7 +231,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
             color: PurplePalette.lilac,
             size: 64,
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           Text(
             'Tidak ada workout hari ini',
             style: TextStyle(
@@ -240,7 +240,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           Text(
             'Lihat jadwal workout untuk menambahkan kegiatan',
             style: TextStyle(
@@ -497,7 +497,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
         actions: [
           IconButton(
             onPressed: _loadWorkouts,
-            icon: Icon(
+            icon: const Icon(
               Icons.refresh,
               color: PurplePalette.lavender,
             ),

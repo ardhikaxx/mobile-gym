@@ -43,56 +43,39 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final List<Map<String, dynamic>> workoutChallenges = [
     {
-      "title": "Push your limits today!",
-      "subtitle": "Full Body Strength",
-      "duration": "45 min",
-      "calories": "500 kcal",
-      "level": "ADVANCED",
-      "levelColor": PurplePalette.orchid,
-      "levelTextColor": PurplePalette.textPrimary,
-      "imageUrl":
-          "https://lh3.googleusercontent.com/aida-public/AB6AXuBbs4sJO7xMlqm7jxgDHV3MQp5sd_jGSqxFzLN-PC8b-7a_6W8wbSi9cJnnVIiwWMu_TPiR7sO0vuWpW2Imgug1BTDpHok1GBlGxopoIjtAFzMXf2o0KFNI_Qoq8iaVswrasTDTGHwaloL7lqrp66vwrX5TgCU8aFTqAwrvJJ2Er8jKm-3MlazFEDAHKGbrkK66Jewi8xG1Xlnbd1zuvAJ2nwJXWXiu_gw5jbahMoYz1mcfk3G8Q_V_KaDcyBuYb1vVIAG6BDaHe2o",
+      "nama_workout": "Push your limits today!",
+      "deskripsi": "Full Body Strength",
+      "durasi_workout": "45 min",
+      "status": "belum",
+      "kategori": "With Equipment",
     },
     {
-      "title": "Morning Cardio",
-      "subtitle": "Cardio Workout",
-      "duration": "20 min",
-      "calories": "250 kcal",
-      "level": "CARDIO",
-      "levelColor": PurplePalette.info,
-      "levelTextColor": PurplePalette.textPrimary,
-      "imageUrl":
-          "https://lh3.googleusercontent.com/aida-public/AB6AXuASbcElkPJJZIaPe80IO1W9tVXiW71kbOu9_Q2uFNfB3u8PwUSPSA7IplxYIW9NmCWvBPIdhsjct2XAlg-BLrZbNif_cmQXk9PvP5Lg7NcRkKBygX3ODyxR1gwR6Dpw5TBq7ciZ_hrO9mEWtnLQi9h2OGQYisBXU8Gpv9y1u0KjsNDHbI1lmSuW3wfq43i6whbp1uQ_Y_IB918Xn43QfAuW92l6Ob4vuFTxTMCBLRaesEgc8s5DVjZ8BCU_Z4JyBr3ybkixqva08z0",
+      "nama_workout": "Morning Cardio",
+      "deskripsi": "Cardio Workout",
+      "durasi_workout": "20 min",
+      "status": "belum",
+      "kategori": "With Equipment",
     },
   ];
 
   final List<Map<String, dynamic>> completedWorkouts = [
     {
-      "title": "Upper Body Strength",
-      "duration": "45 Min",
-      "calories": "320 Kcal",
-      "category": "STRENGTH",
-      "categoryColor": PurplePalette.orchid,
-      "imageUrl":
-          "https://lh3.googleusercontent.com/aida-public/AB6AXuD0r5Lil2-HoDxWibnGSrmwN5joGDPn_D_BRvga3e4tksPamJq2zhffloiFGcCvGbldQMjvDCIDY0YTbofah_UxkYCV2pRxjq_Zmrx9FS9xmAgaOiOIyFvBR4KMLJe1FtI4QsvzQ1jT7J0wTO6SM5_W13e9V2RJKVl3wplvKcyucXK_KLKF8vR9bHvqd2rHuL8Jr0QjCAXi_unz4abwDdH_uBQaJY7HVkVIE3Abr7ErsWpazhB3B6jdJg25KqpMQVnRWZ9QVmDP5WM",
+      "nama_workout": "Upper Body Strength",
+      "durasi_workout": "45 Min",
+      "status": "selesai",
+      "category": "With Equipment",
     },
     {
-      "title": "Morning Cardio",
-      "duration": "30 Min",
-      "calories": "210 Kcal",
-      "category": "CARDIO",
-      "categoryColor": PurplePalette.info,
-      "imageUrl":
-          "https://lh3.googleusercontent.com/aida-public/AB6AXuDtmqgMr_GVgMbh4eZLWl6QSOII4gHTJ8FHbjYU_prWi8lOHyuwKNgPeA3zUvTWMAEBzi44nxpmI8tD_q7ibp58__v-5XlDb2DbK03jDkK1IKN2dcFPwbp8ahCncqSxIW62Kxz6kwzseuN1ghDhwhx50C3zE68MCtBB7EO8tcJRSAZtKbfKSN7fvRlE9C0k07q3BznJqt7teq5_HGySX_eV1yv0anW3NieJMfixgea1Nnw2HO57gO0d_M443cdAmFmFSS1ULZVE_1w",
+      "nama_workout": "Morning Cardio",
+      "durasi_workout": "30 Min",
+      "status": "selesai",
+      "category": "With Equipment",
     },
     {
-      "title": "Leg Day Destruction",
-      "duration": "60 Min",
-      "calories": "450 Kcal",
-      "category": "STRENGTH",
-      "categoryColor": PurplePalette.orchid,
-      "imageUrl":
-          "https://lh3.googleusercontent.com/aida-public/AB6AXuD4mgw2kSFe2qulh1G0K0bdnxNpl6-0M19OAiXaxVHZ_i77MO9D5W_H1onH00qKHT-aUE_kK4sZbjDS9yyb4_waBrqnVQdFiIiTFlhKBoxwLXI6uX81H_21vg4Me8smlueyh4ZKCZJ71ri2jU9N8KQsLpHEEd1ZPvb_1Mib2ApEcScc67w8tTRb4AROjfiwlFGIQZt--zIp2JpXwJfyh4PO6CSQOdcna5Du1F14AiFGmK-V9FwvsE_FO4OsoVMRUxwn6EF0am9R_qM",
+      "nama_workout": "Leg Day Destruction",
+      "durasi_workout": "60 Min",
+      "status": "selesai",
+      "category": "With Equipment",
     },
   ];
 
@@ -371,16 +354,28 @@ class _HomePageState extends State<HomePage> {
                                 index < workoutChallenges.length - 1 ? 16 : 0,
                           ),
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            image: DecorationImage(
-                              image:
-                                  NetworkImage(challenge["imageUrl"] as String),
-                              fit: BoxFit.cover,
-                              colorFilter: ColorFilter.mode(
-                                Colors.black.withOpacity(0.4),
-                                BlendMode.darken,
-                              ),
+                            color: PurplePalette.cardBackground,
+                            borderRadius: BorderRadius.circular(16),
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                PurplePalette.eggplant.withOpacity(0.3),
+                                PurplePalette.cardBackground,
+                              ],
                             ),
+                            border: Border.all(
+                              color: PurplePalette.mauve.withOpacity(0.3),
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: PurplePalette.violet.withOpacity(0.1),
+                                blurRadius: 10,
+                                spreadRadius: 1,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
                           child: Stack(
                             children: [
@@ -405,13 +400,13 @@ class _HomePageState extends State<HomePage> {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 12, vertical: 6),
                                   decoration: BoxDecoration(
-                                    color: challenge["levelColor"],
+                                    color: PurplePalette.orchid.withOpacity(0.8),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Text(
-                                    challenge["level"],
-                                    style: TextStyle(
-                                      color: challenge["levelTextColor"],
+                                    challenge["kategori"],
+                                    style: const TextStyle(
+                                      color: Colors.white,
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
                                       letterSpacing: 1,
@@ -427,7 +422,7 @@ class _HomePageState extends State<HomePage> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      challenge["title"],
+                                      challenge["nama_workout"],
                                       style: const TextStyle(
                                         color: PurplePalette.textPrimary,
                                         fontSize: 20,
@@ -438,7 +433,7 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      challenge["subtitle"],
+                                      challenge["deskripsi"],
                                       style: const TextStyle(
                                         color: PurplePalette.textSecondary,
                                         fontSize: 14,
@@ -449,12 +444,12 @@ class _HomePageState extends State<HomePage> {
                                       children: [
                                         _buildChallengeInfo(
                                           FontAwesomeIcons.clock,
-                                          challenge["duration"],
+                                          challenge["durasi_workout"],
                                         ),
                                         const SizedBox(width: 16),
                                         _buildChallengeInfo(
                                           FontAwesomeIcons.fire,
-                                          challenge["calories"],
+                                          challenge["status"],
                                         ),
                                       ],
                                     ),
@@ -777,43 +772,30 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                workout["imageUrl"] as String,
-                fit: BoxFit.cover,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Center(
-                    child: CircularProgressIndicator(
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                          : null,
-                      color: PurplePalette.lavender,
-                    ),
-                  );
-                },
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          PurplePalette.eggplant.withOpacity(0.8),
-                          PurplePalette.violet.withOpacity(0.8),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Center(
-                      child: Icon(
-                        FontAwesomeIcons.dumbbell,
-                        color: PurplePalette.textPrimary,
-                        size: 24,
-                      ),
-                    ),
-                  );
-                },
+            child: Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    PurplePalette.orchid.withOpacity(0.3),
+                    PurplePalette.lavender.withOpacity(0.1),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: PurplePalette.orchid.withOpacity(0.5),
+                  width: 2,
+                ),
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.fitness_center,
+                  color: PurplePalette.orchid,
+                  size: 28,
+                ),
               ),
             ),
           ),
@@ -826,7 +808,7 @@ class _HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      workout["title"] as String,
+                      workout["nama_workout"] as String,
                       style: const TextStyle(
                         color: PurplePalette.textPrimary,
                         fontSize: 16,
@@ -865,12 +847,12 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     _buildWorkoutDetail(
                       FontAwesomeIcons.clock,
-                      workout["duration"] as String,
+                      workout["durasi_workout"] as String,
                     ),
                     const SizedBox(width: 16),
                     _buildWorkoutDetail(
                       FontAwesomeIcons.fire,
-                      workout["calories"] as String,
+                      workout["status"] as String,
                     ),
                   ],
                 ),
