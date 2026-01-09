@@ -60,7 +60,7 @@ class _MainScreenState extends State<MainScreen> {
         _redirectingToLogin = false;
         _pages = [
           HomePage(bmi: widget.initialBmi ?? 22.0),
-          const PenjadwalanPage(bmi: 22.0),
+          const PenjadwalanPage(),
           const FoodPlanPage(),
           const WorkoutPlanPage(),
           PengaturanPage(

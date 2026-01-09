@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_application_1/service/workout_services.dart';
 
 /// ================= PALETTE WARNA UNGU =================
 class PurplePalette {
@@ -23,6 +24,14 @@ class PurplePalette {
   static const Color accent = purple;
   static const Color success = Color(0xFF4CAF50);
   static const Color info = Color(0xFF2196F3);
+  static const Color warning = Color(0xFFFF9800);
+  static const Color error = Color(0xFFF44336);
+  
+  // Workout category colors
+  static const Color equipmentColor = Color(0xFF4FC3F7); // Biru untuk with equipment
+  static const Color bodyweightColor = Color(0xFF66BB6A); // Hijau untuk without equipment
+  static const Color completedColor = Color(0xFF4CAF50); // Hijau untuk completed
+  static const Color progressColor = Color(0xFFFF9800); // Orange untuk in progress
 }
 
 class WorkoutPlanPage extends StatefulWidget {
@@ -41,128 +50,435 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
   ];
   final List<Color> _categoryColors = [
     PurplePalette.accent,
-    PurplePalette.orchid,
-    PurplePalette.info,
+    PurplePalette.equipmentColor,
+    PurplePalette.bodyweightColor,
   ];
 
-  final List<Map<String, dynamic>> equipmentExercises = [
-    {
-      "title": "Bench Press",
-      "description": "Chest compound movement",
-      "equipment": "BARBELL",
-      "icon": Icons.fitness_center,
-      "color": PurplePalette.orchid,
-      "duration": "25 min",
-      "exercises": 4,
-      "category": "With Equipment",
-    },
-    {
-      "title": "Lat Pulldown",
-      "description": "Back width development",
-      "equipment": "CABLE MACHINE",
-      "icon": Icons.fitness_center,
-      "color": PurplePalette.orchid,
-      "duration": "20 min",
-      "exercises": 3,
-      "category": "With Equipment",
-    },
-    {
-      "title": "Leg Extension",
-      "description": "Quadriceps isolation",
-      "equipment": "MACHINE",
-      "icon": Icons.fitness_center,
-      "color": PurplePalette.orchid,
-      "duration": "15 min",
-      "exercises": 3,
-      "category": "With Equipment",
-    },
-    {
-      "title": "Shoulder Press",
-      "description": "Shoulder compound movement",
-      "equipment": "DUMBBELL",
-      "icon": Icons.fitness_center,
-      "color": PurplePalette.orchid,
-      "duration": "20 min",
-      "exercises": 4,
-      "category": "With Equipment",
-    },
-    {
-      "title": "T-Bar Row",
-      "description": "Back thickness builder",
-      "equipment": "BARBELL",
-      "icon": Icons.fitness_center,
-      "color": PurplePalette.orchid,
-      "duration": "20 min",
-      "exercises": 3,
-      "category": "With Equipment",
-    },
-  ];
+  // State untuk data
+  WorkoutResponse? _workoutResponse;
+  bool _isLoading = true;
+  String _errorMessage = '';
 
-  final List<Map<String, dynamic>> bodyweightExercises = [
-    {
-      "title": "Push-up",
-      "description": "Chest and triceps",
-      "equipment": "BODYWEIGHT",
-      "icon": Icons.fitness_center,
-      "color": PurplePalette.orchid,
-      "duration": "15 min",
-      "exercises": 3,
-      "category": "Without Equipment",
-    },
-    {
-      "title": "Pull Up",
-      "description": "Back and biceps",
-      "equipment": "BAR",
-      "icon": Icons.fitness_center,
-      "color": PurplePalette.orchid,
-      "duration": "20 min",
-      "exercises": 4,
-      "category": "Without Equipment",
-    },
-    {
-      "title": "Squat",
-      "description": "Leg compound movement",
-      "equipment": "BODYWEIGHT",
-      "icon": Icons.fitness_center,
-      "color": PurplePalette.orchid,
-      "duration": "15 min",
-      "exercises": 3,
-      "category": "Without Equipment",
-    },
-    {
-      "title": "Plank",
-      "description": "Core stability",
-      "equipment": "MAT",
-      "icon": Icons.fitness_center,
-      "color": PurplePalette.orchid,
-      "duration": "10 min",
-      "exercises": 2,
-      "category": "Without Equipment",
-    },
-    {
-      "title": "Russian Twist",
-      "description": "Oblique training",
-      "equipment": "MAT",
-      "icon": Icons.fitness_center,
-      "color": PurplePalette.orchid,
-      "duration": "10 min",
-      "exercises": 2,
-      "category": "Without Equipment",
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadWorkouts();
+  }
 
-  List<Map<String, dynamic>> get filteredWorkouts {
-    if (_selectedCategory == 0) {
-      return [...equipmentExercises, ...bodyweightExercises];
-    } else if (_selectedCategory == 1) {
-      return equipmentExercises;
+  Future<void> _loadWorkouts() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
+
+    final result = await WorkoutService.getTodayWorkoutsWithRetry();
+
+    if (result['success'] == true && result['data'] != null) {
+      setState(() {
+        _workoutResponse = result['data'];
+        _isLoading = false;
+      });
     } else {
-      return bodyweightExercises;
+      setState(() {
+        _errorMessage = result['message'] ?? 'Gagal memuat data workout';
+        _isLoading = false;
+      });
     }
+  }
+
+  List<Workout> _getFilteredWorkouts() {
+    if (_workoutResponse == null) return [];
+    
+    if (_selectedCategory == 0) {
+      return _workoutResponse!.workouts;
+    } else if (_selectedCategory == 1) {
+      return _workoutResponse!.workouts
+          .where((workout) => !workout.equipment.toLowerCase().contains('no equipment') && 
+                            !workout.equipment.toLowerCase().contains('bodyweight') &&
+                            workout.equipment.isNotEmpty)
+          .toList();
+    } else {
+      return _workoutResponse!.workouts
+          .where((workout) => workout.equipment.toLowerCase().contains('no equipment') || 
+                            workout.equipment.toLowerCase().contains('bodyweight') ||
+                            workout.equipment.isEmpty)
+          .toList();
+    }
+  }
+
+  Color _getWorkoutColor(Workout workout) {
+    if (_selectedCategory == 1 || workout.workoutColor == 'equipment') {
+      return PurplePalette.equipmentColor;
+    } else if (_selectedCategory == 2 || workout.workoutColor == 'bodyweight') {
+      return PurplePalette.bodyweightColor;
+    }
+    
+    switch (workout.workoutColor) {
+      case 'yoga':
+        return Colors.green;
+      case 'cardio':
+        return Colors.red;
+      case 'strength':
+        return Colors.blue;
+      case 'hiit':
+        return Colors.orange;
+      default:
+        return PurplePalette.orchid;
+    }
+  }
+
+  Color _getStatusColor(Workout workout) {
+    if (workout.isCompleted) {
+      return PurplePalette.completedColor;
+    } else if (workout.isStarted) {
+      return PurplePalette.progressColor;
+    }
+    return PurplePalette.textSecondary;
+  }
+
+  IconData _getStatusIcon(Workout workout) {
+    if (workout.isCompleted) {
+      return FontAwesomeIcons.checkCircle;
+    } else if (workout.isStarted) {
+      return FontAwesomeIcons.playCircle;
+    }
+    return FontAwesomeIcons.clock;
+  }
+
+  IconData _getWorkoutIcon(Workout workout) {
+    if (workout.kategori.toLowerCase().contains('yoga')) {
+      return FontAwesomeIcons.spa;
+    } else if (workout.kategori.toLowerCase().contains('cardio')) {
+      return FontAwesomeIcons.running;
+    } else if (workout.kategori.toLowerCase().contains('strength') || 
+               workout.kategori.toLowerCase().contains('muscle')) {
+      return FontAwesomeIcons.dumbbell;
+    }
+    return FontAwesomeIcons.fire;
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(
+            color: PurplePalette.orchid,
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Memuat data workout...',
+            style: TextStyle(
+              color: PurplePalette.textSecondary,
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            FontAwesomeIcons.exclamationTriangle,
+            color: PurplePalette.error,
+            size: 64,
+          ),
+          const SizedBox(height: 20),
+          Text(
+            _errorMessage,
+            style: TextStyle(
+              color: PurplePalette.textPrimary,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: _loadWorkouts,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: PurplePalette.accent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            ),
+            child: const Text(
+              'Coba Lagi',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            FontAwesomeIcons.dumbbell,
+            color: PurplePalette.lilac,
+            size: 64,
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Tidak ada workout hari ini',
+            style: TextStyle(
+              color: PurplePalette.textPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Lihat jadwal workout untuk menambahkan kegiatan',
+            style: TextStyle(
+              color: PurplePalette.textSecondary,
+              fontSize: 14,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWorkoutCard(Workout workout) {
+    final workoutColor = _getWorkoutColor(workout);
+    final statusColor = _getStatusColor(workout);
+    final statusIcon = _getStatusIcon(workout);
+    final workoutIcon = _getWorkoutIcon(workout);
+
+    return GestureDetector(
+      onTap: () {
+        // TODO: navigasi ke halaman camera workout
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        child: Container(
+          decoration: BoxDecoration(
+            color: PurplePalette.cardBackground,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: PurplePalette.mauve.withOpacity(0.3),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: PurplePalette.violet.withOpacity(0.1),
+                blurRadius: 10,
+                spreadRadius: 1,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            workoutColor.withOpacity(0.3),
+                            workoutColor.withOpacity(0.1),
+                          ],
+                        ),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: workoutColor.withOpacity(0.5),
+                          width: 2,
+                        ),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          workoutIcon,
+                          color: workoutColor,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        // TODO: Show workout actions
+                      },
+                      icon: const Icon(
+                        FontAwesomeIcons.ellipsisVertical,
+                        color: PurplePalette.textSecondary,
+                        size: 20,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  workout.namaWorkout,
+                  style: const TextStyle(
+                    color: PurplePalette.textPrimary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  workout.deskripsi,
+                  style: const TextStyle(
+                    color: PurplePalette.textSecondary,
+                    fontSize: 12,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: workoutColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: workoutColor.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Text(
+                        workout.equipment.isNotEmpty ? workout.equipment : 'No Equipment',
+                        style: TextStyle(
+                          color: workoutColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: statusColor.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min, 
+                        children: [
+                          Icon(
+                            statusIcon,
+                            color: statusColor,
+                            size: 10,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            workout.statusText,
+                            style: TextStyle(
+                              color: statusColor,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    if (workout.jadwal != null) ...[
+                      const Icon(
+                        FontAwesomeIcons.clock,
+                        color: PurplePalette.textSecondary,
+                        size: 12,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        workout.jadwal!.formattedTime,
+                        style: const TextStyle(
+                          color: PurplePalette.textSecondary,
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                    ],
+                    const Icon(
+                      FontAwesomeIcons.listCheck,
+                      color: PurplePalette.textSecondary,
+                      size: 12,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      workout.formattedExercises,
+                      style: const TextStyle(
+                        color: PurplePalette.textSecondary,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const Spacer(),
+                    if (workout.jadwal != null) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: PurplePalette.wildberry.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: PurplePalette.wildberry,
+                          ),
+                        ),
+                        child: Text(
+                          workout.jadwal!.kategoriJadwal,
+                          style: const TextStyle(
+                            color: PurplePalette.lavender,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final filteredWorkouts = _getFilteredWorkouts();
+
     return Scaffold(
       backgroundColor: PurplePalette.background,
       appBar: AppBar(
@@ -170,7 +486,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
         elevation: 0,
         centerTitle: true,
         title: const Text(
-          "Workout Library",
+          "Workout Plan",
           style: TextStyle(
             color: PurplePalette.textPrimary,
             fontSize: 26,
@@ -180,22 +496,10 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
         ),
         actions: [
           IconButton(
-            onPressed: () {},
-            icon: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: PurplePalette.cardBackground,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: PurplePalette.mauve.withOpacity(0.5),
-                ),
-              ),
-              child: const Icon(
-                FontAwesomeIcons.search,
-                color: PurplePalette.textPrimary,
-                size: 20,
-              ),
+            onPressed: _loadWorkouts,
+            icon: Icon(
+              Icons.refresh,
+              color: PurplePalette.lavender,
             ),
           ),
         ],
@@ -260,6 +564,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
               ),
             ),
             
+            /// ================= HEADER =================
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
@@ -267,7 +572,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
                 children: [
                   Text(
                     _selectedCategory == 0
-                        ? "All Exercises"
+                        ? "All Workouts"
                         : _selectedCategory == 1
                             ? "With Equipment"
                             : "Without Equipment",
@@ -277,186 +582,55 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  TextButton(
-                    onPressed: () {},
-                    child: const Row(
-                      children: [
-                        Text(
-                          "See all",
-                          style: TextStyle(
-                            color: PurplePalette.lavender,
-                            fontWeight: FontWeight.bold,
-                          ),
+                  if (_workoutResponse != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: PurplePalette.wildberry.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: PurplePalette.wildberry,
                         ),
-                        SizedBox(width: 4),
-                        Icon(
-                          FontAwesomeIcons.chevronRight,
+                      ),
+                      child: Text(
+                        "${filteredWorkouts.length} items",
+                        style: const TextStyle(
                           color: PurplePalette.lavender,
-                          size: 12,
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
 
-            /// ================= EXERCISES GRID =================
+            const SizedBox(height: 8),
+
+            /// ================= WORKOUTS LIST =================
             Expanded(
-              child: SingleChildScrollView(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 0.85,
-                  ),
-                  itemCount: filteredWorkouts.length,
-                  itemBuilder: (context, index) {
-                    final workout = filteredWorkouts[index];
-                    return _buildExerciseCard(workout);
-                  },
-                ),
-              ),
+              child: _isLoading
+                  ? _buildLoadingState()
+                  : _errorMessage.isNotEmpty
+                      ? _buildErrorState()
+                      : filteredWorkouts.isEmpty
+                          ? _buildEmptyState()
+                          : SingleChildScrollView(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              child: Column(
+                                children: [
+                                  ...filteredWorkouts.map((workout) => _buildWorkoutCard(workout)),
+                                  const SizedBox(height: 80),
+                                ],
+                              ),
+                            ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildExerciseCard(Map<String, dynamic> workout) {
-    return GestureDetector(
-      onTap: () {},
-      child: Container(
-        height: double.infinity,
-        decoration: BoxDecoration(
-          color: PurplePalette.cardBackground,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: PurplePalette.mauve.withOpacity(0.3),
-            width: 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: PurplePalette.violet.withOpacity(0.1),
-              blurRadius: 10,
-              spreadRadius: 1,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      workout["color"].withOpacity(0.3),
-                      workout["color"].withOpacity(0.1),
-                    ],
-                  ),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: workout["color"].withOpacity(0.5),
-                    width: 2,
-                  ),
-                ),
-                child: Center(
-                  child: Icon(
-                    workout["icon"] as IconData,
-                    color: workout["color"] as Color,
-                    size: 20,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                workout["title"],
-                style: const TextStyle(
-                  color: PurplePalette.textPrimary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                workout["description"],
-                style: const TextStyle(
-                  color: PurplePalette.textSecondary,
-                  fontSize: 12,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: workout["color"].withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: workout["color"].withOpacity(0.3),
-                  ),
-                ),
-                child: Text(
-                  workout["equipment"],
-                  style: TextStyle(
-                    color: workout["color"],
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  const Icon(
-                    FontAwesomeIcons.clock,
-                    color: PurplePalette.textSecondary,
-                    size: 12,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    workout["duration"],
-                    style: const TextStyle(
-                      color: PurplePalette.textSecondary,
-                      fontSize: 12,
-                    ),
-                  ),
-                  const Spacer(),
-                  const Icon(
-                    FontAwesomeIcons.listCheck,
-                    color: PurplePalette.textSecondary,
-                    size: 12,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    "${workout["exercises"]} ex",
-                    style: const TextStyle(
-                      color: PurplePalette.textSecondary,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
         ),
       ),
     );
