@@ -171,20 +171,17 @@ class _PengaturanPageState extends State<PengaturanPage> {
     }
   }
 
-  // Method untuk menampilkan dialog logout
   void _showLogoutConfirmation(BuildContext context) {
-    // Cegah dialog ganda
     if (_isLoggingOut) return;
 
     showDialog(
       context: context,
-      barrierDismissible: false, // User harus memilih opsi
+      barrierDismissible: false,
       builder: (context) {
-        // Simpan context yang valid
         final dialogContext = context;
 
         return WillPopScope(
-          onWillPop: () async => false, // Cegah dismiss dengan back button
+          onWillPop: () async => false,
           child: AlertDialog(
             backgroundColor: PurplePalette.cardBackground,
             shape: RoundedRectangleBorder(
