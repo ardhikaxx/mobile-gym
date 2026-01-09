@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_application_1/service/connect.dart';
 import 'package:flutter_application_1/utils/session_manager.dart';
@@ -113,39 +114,74 @@ class Workout {
     }
   }
 
-  String get statusColor {
-    switch (status.toLowerCase()) {
-      case 'selesai':
-        return 'success';
-      case 'sedang':
-        return 'warning';
-      case 'belum':
-        return 'default';
-      default:
-        return 'default';
-    }
-  }
-
   String get formattedExercises => '$exercises ${exercises == 1 ? 'exercise' : 'exercises'}';
 
   // Get workout icon berdasarkan kategori
-  String get workoutIcon {
-    if (kategori.toLowerCase().contains('yoga')) return '🧘';
-    if (kategori.toLowerCase().contains('cardio')) return '🏃';
-    if (kategori.toLowerCase().contains('strength') || kategori.toLowerCase().contains('muscle')) return '🏋️';
-    if (kategori.toLowerCase().contains('hiit')) return '⚡';
-    if (equipment.toLowerCase().contains('bodyweight') || equipment.toLowerCase().contains('no equipment')) return '🤸';
-    return '💪';
+  IconData get workoutIcon {
+    if (kategori.toLowerCase().contains('yoga') || deskripsi.toLowerCase().contains('yoga')) {
+      return Icons.self_improvement;
+    } else if (kategori.toLowerCase().contains('cardio') || deskripsi.toLowerCase().contains('cardio')) {
+      return Icons.directions_run;
+    } else if (kategori.toLowerCase().contains('strength') || 
+               kategori.toLowerCase().contains('muscle') ||
+               namaWorkout.toLowerCase().contains('chest') ||
+               namaWorkout.toLowerCase().contains('upper body') ||
+               namaWorkout.toLowerCase().contains('strength')) {
+      return Icons.fitness_center;
+    } else if (kategori.toLowerCase().contains('hiit')) {
+      return Icons.flash_on;
+    } else if (equipment.toLowerCase().contains('bodyweight') || 
+               equipment.toLowerCase().contains('no equipment')) {
+      return Icons.accessibility;
+    }
+    return Icons.sports_gymnastics;
   }
 
   // Get workout color berdasarkan kategori
-  String get workoutColor {
-    if (kategori.toLowerCase().contains('yoga') || kategori.toLowerCase().contains('flexibility')) return 'yoga';
-    if (kategori.toLowerCase().contains('cardio')) return 'cardio';
-    if (kategori.toLowerCase().contains('strength') || kategori.toLowerCase().contains('muscle')) return 'strength';
-    if (kategori.toLowerCase().contains('hiit')) return 'hiit';
-    if (equipment.toLowerCase().contains('bodyweight') || equipment.toLowerCase().contains('no equipment')) return 'bodyweight';
-    return 'equipment';
+  int get workoutColor {
+    if (kategori.toLowerCase().contains('yoga') || deskripsi.toLowerCase().contains('yoga')) {
+      return 0xFF66BB6A; // Hijau untuk yoga
+    } else if (kategori.toLowerCase().contains('cardio') || deskripsi.toLowerCase().contains('cardio')) {
+      return 0xFFEF5350; // Merah untuk cardio
+    } else if (kategori.toLowerCase().contains('strength') || 
+               kategori.toLowerCase().contains('muscle')) {
+      return 0xFF4FC3F7; // Biru untuk strength
+    } else if (kategori.toLowerCase().contains('hiit')) {
+      return 0xFFFF9800; // Orange untuk HIIT
+    }
+    return 0xFFAF69EE; // Ungu default
+  }
+
+  // Get status color
+  int get statusColorCode {
+    switch (status.toLowerCase()) {
+      case 'selesai':
+        return 0xFF4CAF50; // Hijau untuk selesai
+      case 'sedang':
+        return 0xFFFF9800; // Orange untuk sedang
+      case 'belum':
+        return 0xFFBD93D3; // Ungu untuk belum
+      default:
+        return 0xFFBD93D3; // Ungu default
+    }
+  }
+
+  // Format durasi dari jadwal jika ada
+  String get formattedDuration {
+    if (jadwal != null && jadwal!.durasiWorkout.isNotEmpty) {
+      return jadwal!.durasiWorkout;
+    }
+    return '${exercises * 5} min'; // Estimasi 5 menit per exercise
+  }
+
+  // Get category display text
+  String get categoryDisplay {
+    if (equipment.toLowerCase().contains('no equipment') || 
+        equipment.toLowerCase().contains('bodyweight') ||
+        equipment.isEmpty) {
+      return 'Without Equipment';
+    }
+    return 'With Equipment';
   }
 }
 
@@ -226,62 +262,26 @@ class WorkoutResponse {
     );
   }
 
-  // Method untuk grouping workout berdasarkan kategori
-  Map<String, List<Workout>> getGroupedByCategory() {
-    Map<String, List<Workout>> grouped = {
-      'With Equipment': [],
-      'Without Equipment': [],
-    };
-
-    for (var workout in workouts) {
-      if (workout.equipment.toLowerCase().contains('no equipment') || 
-          workout.equipment.toLowerCase().contains('bodyweight') ||
-          workout.equipment.isEmpty) {
-        grouped['Without Equipment']!.add(workout);
-      } else {
-        grouped['With Equipment']!.add(workout);
-      }
-    }
-
-    return grouped;
+  // Method untuk mendapatkan workout yang belum dimulai (untuk slider challenge)
+  List<Workout> get notStartedWorkouts {
+    return workouts.where((workout) => workout.isNotStarted).toList();
   }
 
-  // Method untuk grouping workout berdasarkan status
-  Map<String, List<Workout>> getGroupedByStatus() {
-    Map<String, List<Workout>> grouped = {
-      'completed': [],
-      'in_progress': [],
-      'not_started': [],
-    };
+  // Method untuk mendapatkan workout yang sudah selesai (untuk history)
+  List<Workout> get completedWorkouts {
+    return workouts.where((workout) => workout.isCompleted).toList();
+  }
 
-    for (var workout in workouts) {
-      if (workout.isCompleted) {
-        grouped['completed']!.add(workout);
-      } else if (workout.isStarted) {
-        grouped['in_progress']!.add(workout);
-      } else {
-        grouped['not_started']!.add(workout);
-      }
-    }
-
-    return grouped;
+  // Method untuk mendapatkan workout yang sedang berjalan
+  List<Workout> get inProgressWorkouts {
+    return workouts.where((workout) => workout.isStarted).toList();
   }
 
   // Method untuk menghitung statistik
   Map<String, int> getStatistics() {
-    int completed = 0;
-    int inProgress = 0;
-    int notStarted = 0;
-
-    for (var workout in workouts) {
-      if (workout.isCompleted) {
-        completed++;
-      } else if (workout.isStarted) {
-        inProgress++;
-      } else {
-        notStarted++;
-      }
-    }
+    int completed = completedWorkouts.length;
+    int inProgress = inProgressWorkouts.length;
+    int notStarted = notStartedWorkouts.length;
 
     return {
       'completed': completed,
@@ -289,6 +289,23 @@ class WorkoutResponse {
       'not_started': notStarted,
       'total': workouts.length,
     };
+  }
+
+  // Method untuk mendapatkan progress percentage
+  double get progressPercentage {
+    if (workouts.isEmpty) return 0.0;
+    return completedWorkouts.length / workouts.length;
+  }
+
+  // Method untuk mendapatkan next workout (yang belum dimulai dengan jadwal terdekat)
+  Workout? get nextWorkout {
+    if (notStartedWorkouts.isEmpty) return null;
+    
+    // Urutkan berdasarkan jam jadwal
+    final sorted = notStartedWorkouts.where((w) => w.jadwal != null).toList()
+      ..sort((a, b) => a.jadwal!.jam.compareTo(b.jadwal!.jam));
+    
+    return sorted.isNotEmpty ? sorted.first : notStartedWorkouts.first;
   }
 }
 
@@ -362,8 +379,74 @@ class WorkoutService {
     }
   }
 
-  // Method untuk mengambil workout berdasarkan jadwal ID
-  static Future<Map<String, dynamic>> getWorkoutByJadwalId(int jadwalId) async {
+  // Method khusus untuk home page: mendapatkan workout challenge (belum dimulai)
+  static Future<Map<String, dynamic>> getWorkoutChallenges() async {
+    final result = await getTodayWorkouts();
+    
+    if (!result['success'] || result['data'] == null) {
+      return result;
+    }
+    
+    final WorkoutResponse workoutResponse = result['data'];
+    final challenges = workoutResponse.notStartedWorkouts;
+    
+    return {
+      'success': true,
+      'message': 'Workout challenges berhasil diambil',
+      'data': challenges,
+      'total': challenges.length,
+    };
+  }
+
+  // Method khusus untuk home page: mendapatkan workout history (sudah selesai)
+  static Future<Map<String, dynamic>> getWorkoutHistory() async {
+    final result = await getTodayWorkouts();
+    
+    if (!result['success'] || result['data'] == null) {
+      return result;
+    }
+    
+    final WorkoutResponse workoutResponse = result['data'];
+    final history = workoutResponse.completedWorkouts;
+    
+    return {
+      'success': true,
+      'message': 'Workout history berhasil diambil',
+      'data': history,
+      'total': history.length,
+    };
+  }
+
+  // Method untuk mendapatkan workout statistics
+  static Future<Map<String, dynamic>> getWorkoutStatistics() async {
+    final result = await getTodayWorkouts();
+    
+    if (!result['success'] || result['data'] == null) {
+      return result;
+    }
+    
+    final WorkoutResponse workoutResponse = result['data'];
+    final statistics = workoutResponse.getStatistics();
+    final nextWorkout = workoutResponse.nextWorkout;
+    
+    return {
+      'success': true,
+      'message': 'Workout statistics berhasil diambil',
+      'data': {
+        'statistics': statistics,
+        'progress_percentage': workoutResponse.progressPercentage,
+        'next_workout': nextWorkout,
+        'total_workouts': workoutResponse.totalWorkouts,
+        'date': workoutResponse.date,
+      },
+    };
+  }
+
+  // Method untuk update status workout
+  static Future<Map<String, dynamic>> updateWorkoutStatus({
+    required int workoutId,
+    required String status,
+  }) async {
     final token = await SessionManager.getAuthToken();
     
     if (token == null) {
@@ -374,47 +457,31 @@ class WorkoutService {
       };
     }
     
-    final url = Uri.parse('$apiConnect/api/workout/jadwal/$jadwalId');
+    final url = Uri.parse('$apiConnect/api/workout/$workoutId/status');
     
     try {
-      final response = await http.get(
+      final response = await http.put(
         url,
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
+        body: jsonEncode({'status': status}),
       );
 
       final data = jsonDecode(response.body);
       
       if (response.statusCode == 200 && data['status'] == 'success') {
-        // Data mungkin berupa single workout atau list
-        if (data['data'] is List) {
-          List<Workout> workouts = (data['data'] as List)
-              .map((item) => Workout.fromJson(item))
-              .toList();
-          
-          return {
-            'success': true,
-            'message': data['message'] ?? 'Workout berhasil diambil',
-            'data': workouts,
-            'rawData': data,
-          };
-        } else {
-          Workout workout = Workout.fromJson(data['data']);
-          
-          return {
-            'success': true,
-            'message': data['message'] ?? 'Workout berhasil diambil',
-            'data': workout,
-            'rawData': data,
-          };
-        }
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Status workout berhasil diperbarui',
+          'data': data['data'],
+        };
       } else {
         return {
           'success': false,
-          'message': data['message'] ?? 'Gagal mengambil workout',
+          'message': data['message'] ?? 'Gagal memperbarui status workout',
           'errorCode': response.statusCode,
           'data': null,
         };
@@ -428,62 +495,20 @@ class WorkoutService {
     }
   }
 
-  // Method untuk mendapatkan workout berdasarkan kategori
-  static Future<Map<String, dynamic>> getWorkoutByCategory(String category) async {
-    final result = await getTodayWorkouts();
-    
-    if (!result['success'] || result['data'] == null) {
-      return result;
-    }
-    
-    final WorkoutResponse workoutResponse = result['data'];
-    final groupedWorkouts = workoutResponse.getGroupedByCategory();
-    
-    String normalizedCategory = category;
-    if (category.toLowerCase().contains('with equipment')) {
-      normalizedCategory = 'With Equipment';
-    } else if (category.toLowerCase().contains('without equipment') || category.toLowerCase().contains('no equipment')) {
-      normalizedCategory = 'Without Equipment';
-    }
-    
-    List<Workout> workouts = groupedWorkouts[normalizedCategory] ?? [];
-    
-    return {
-      'success': true,
-      'message': 'Workout kategori $category berhasil diambil',
-      'data': workouts,
-      'total': workouts.length,
-    };
+  // Method untuk memulai workout
+  static Future<Map<String, dynamic>> startWorkout(int workoutId) async {
+    return await updateWorkoutStatus(
+      workoutId: workoutId,
+      status: 'sedang',
+    );
   }
 
-  // Method untuk mendapatkan workout berdasarkan status
-  static Future<Map<String, dynamic>> getWorkoutByStatus(String status) async {
-    final result = await getTodayWorkouts();
-    
-    if (!result['success'] || result['data'] == null) {
-      return result;
-    }
-    
-    final WorkoutResponse workoutResponse = result['data'];
-    final groupedByStatus = workoutResponse.getGroupedByStatus();
-    
-    String normalizedStatus = status.toLowerCase();
-    if (normalizedStatus == 'completed') {
-      normalizedStatus = 'completed';
-    } else if (normalizedStatus == 'in progress' || normalizedStatus == 'sedang') {
-      normalizedStatus = 'in_progress';
-    } else {
-      normalizedStatus = 'not_started';
-    }
-    
-    List<Workout> workouts = groupedByStatus[normalizedStatus] ?? [];
-    
-    return {
-      'success': true,
-      'message': 'Workout status $status berhasil diambil',
-      'data': workouts,
-      'total': workouts.length,
-    };
+  // Method untuk menyelesaikan workout
+  static Future<Map<String, dynamic>> completeWorkout(int workoutId) async {
+    return await updateWorkoutStatus(
+      workoutId: workoutId,
+      status: 'selesai',
+    );
   }
 
   // Method untuk refresh token
@@ -558,6 +583,62 @@ class WorkoutService {
     return {
       'success': false,
       'message': 'Gagal mengambil workout setelah beberapa percobaan',
+      'data': null,
+    };
+  }
+
+  // Method untuk mengambil workout challenges dengan retry
+  static Future<Map<String, dynamic>> getWorkoutChallengesWithRetry({
+    int maxRetries = 3,
+    int delayInSeconds = 2,
+  }) async {
+    for (int i = 0; i < maxRetries; i++) {
+      final result = await getWorkoutChallenges();
+      
+      if (result['success'] == true) {
+        return result;
+      }
+      
+      if (result['errorCode'] == 401 && i < maxRetries - 1) {
+        await refreshToken();
+      }
+      
+      if (i < maxRetries - 1) {
+        await Future.delayed(Duration(seconds: delayInSeconds));
+      }
+    }
+    
+    return {
+      'success': false,
+      'message': 'Gagal mengambil workout challenges setelah beberapa percobaan',
+      'data': null,
+    };
+  }
+
+  // Method untuk mengambil workout history dengan retry
+  static Future<Map<String, dynamic>> getWorkoutHistoryWithRetry({
+    int maxRetries = 3,
+    int delayInSeconds = 2,
+  }) async {
+    for (int i = 0; i < maxRetries; i++) {
+      final result = await getWorkoutHistory();
+      
+      if (result['success'] == true) {
+        return result;
+      }
+      
+      if (result['errorCode'] == 401 && i < maxRetries - 1) {
+        await refreshToken();
+      }
+      
+      if (i < maxRetries - 1) {
+        await Future.delayed(Duration(seconds: delayInSeconds));
+      }
+    }
+    
+    return {
+      'success': false,
+      'message': 'Gagal mengambil workout history setelah beberapa percobaan',
       'data': null,
     };
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_application_1/service/auth_services.dart';
+import 'package:flutter_application_1/service/workout_services.dart';
 import 'package:flutter_application_1/utils/session_manager.dart';
 
 class PurplePalette {
@@ -24,6 +25,8 @@ class PurplePalette {
   static const Color accent = purple;
   static const Color success = Color(0xFF4CAF50);
   static const Color info = Color(0xFF2196F3);
+  static const Color warning = Color(0xFFFF9800);
+  static const Color error = Color(0xFFF44336);
 }
 
 /// ================= THEME CONTROLLER =================
@@ -41,61 +44,46 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final List<Map<String, dynamic>> workoutChallenges = [
-    {
-      "nama_workout": "Push your limits today!",
-      "deskripsi": "Full Body Strength",
-      "durasi_workout": "45 min",
-      "status": "belum",
-      "kategori": "With Equipment",
-    },
-    {
-      "nama_workout": "Morning Cardio",
-      "deskripsi": "Cardio Workout",
-      "durasi_workout": "20 min",
-      "status": "belum",
-      "kategori": "With Equipment",
-    },
-  ];
-
-  final List<Map<String, dynamic>> completedWorkouts = [
-    {
-      "nama_workout": "Upper Body Strength",
-      "durasi_workout": "45 Min",
-      "status": "selesai",
-      "category": "With Equipment",
-    },
-    {
-      "nama_workout": "Morning Cardio",
-      "durasi_workout": "30 Min",
-      "status": "selesai",
-      "category": "With Equipment",
-    },
-    {
-      "nama_workout": "Leg Day Destruction",
-      "durasi_workout": "60 Min",
-      "status": "selesai",
-      "category": "With Equipment",
-    },
-  ];
-
-  // Variabel untuk menyimpan data user
+  // State untuk data user
   Map<String, dynamic>? _userData;
-  bool _isLoading = true;
-  String _errorMessage = '';
+  bool _isLoadingUser = true;
+  String _userErrorMessage = '';
+
+  // State untuk data workout
+  List<Workout> _workoutChallenges = []; // Workout dengan status "belum"
+  List<Workout> _completedWorkouts = []; // Workout dengan status "selesai"
+  bool _isLoadingWorkouts = true;
+  String _workoutErrorMessage = '';
+
+  // State untuk statistics
+  Map<String, dynamic> _workoutStats = {
+    'completed': 0,
+    'in_progress': 0,
+    'not_started': 0,
+    'total': 0,
+    'progress_percentage': 0.0,
+  };
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    _loadAllData();
+  }
+
+  // Method untuk memuat semua data
+  Future<void> _loadAllData() async {
+    await Future.wait([
+      _loadUserData(),
+      _loadWorkoutData(),
+    ]);
   }
 
   // Method untuk memuat data user
   Future<void> _loadUserData() async {
     try {
       setState(() {
-        _isLoading = true;
-        _errorMessage = '';
+        _isLoadingUser = true;
+        _userErrorMessage = '';
       });
 
       // Coba ambil dari cache/local storage terlebih dahulu
@@ -103,7 +91,7 @@ class _HomePageState extends State<HomePage> {
       if (cachedUserData != null) {
         setState(() {
           _userData = cachedUserData;
-          _isLoading = false;
+          _isLoadingUser = false;
         });
 
         // Update nameNotifier untuk widget lain
@@ -116,7 +104,7 @@ class _HomePageState extends State<HomePage> {
       if (result['success'] == true) {
         setState(() {
           _userData = result['data']['pengguna'];
-          _isLoading = false;
+          _isLoadingUser = false;
         });
 
         // Update nameNotifier untuk widget lain
@@ -125,22 +113,205 @@ class _HomePageState extends State<HomePage> {
         // Jika gagal fetch dari API, tetap gunakan data cache
         if (_userData == null) {
           setState(() {
-            _errorMessage = result['message'] ?? 'Gagal memuat data user';
-            _isLoading = false;
+            _userErrorMessage = result['message'] ?? 'Gagal memuat data user';
+            _isLoadingUser = false;
           });
         }
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Terjadi kesalahan: $e';
-        _isLoading = false;
+        _userErrorMessage = 'Terjadi kesalahan: $e';
+        _isLoadingUser = false;
       });
     }
   }
 
-  // Method untuk refresh data user
+  // Method untuk memuat data workout
+  Future<void> _loadWorkoutData() async {
+    try {
+      setState(() {
+        _isLoadingWorkouts = true;
+        _workoutErrorMessage = '';
+      });
+
+      // Ambil data workout challenges (belum dimulai)
+      final challengesResult =
+          await WorkoutService.getWorkoutChallengesWithRetry();
+
+      // Ambil data workout history (sudah selesai)
+      final historyResult = await WorkoutService.getWorkoutHistoryWithRetry();
+
+      // Ambil data statistics
+      final statsResult = await WorkoutService.getWorkoutStatistics();
+
+      if (challengesResult['success'] == true) {
+        setState(() {
+          _workoutChallenges = challengesResult['data'] ?? [];
+        });
+      } else {
+        setState(() {
+          _workoutErrorMessage =
+              challengesResult['message'] ?? 'Gagal memuat workout challenges';
+        });
+      }
+
+      if (historyResult['success'] == true) {
+        setState(() {
+          _completedWorkouts = historyResult['data'] ?? [];
+        });
+      } else if (_workoutErrorMessage.isEmpty) {
+        setState(() {
+          _workoutErrorMessage =
+              historyResult['message'] ?? 'Gagal memuat workout history';
+        });
+      }
+
+      if (statsResult['success'] == true) {
+        setState(() {
+          _workoutStats = statsResult['data'] ?? _workoutStats;
+        });
+      }
+
+      setState(() {
+        _isLoadingWorkouts = false;
+      });
+    } catch (e) {
+      setState(() {
+        _workoutErrorMessage = 'Terjadi kesalahan: $e';
+        _isLoadingWorkouts = false;
+      });
+    }
+  }
+
+  // Method untuk refresh semua data
   Future<void> _refreshData() async {
-    await _loadUserData();
+    await _loadAllData();
+  }
+
+  // Method untuk memulai workout
+  Future<void> _startWorkout(Workout workout) async {
+    final result = await WorkoutService.startWorkout(workout.id);
+
+    if (result['success'] == true) {
+      // Refresh data workout setelah berhasil memulai
+      await _loadWorkoutData();
+
+      // Tampilkan snackbar sukses
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Memulai ${workout.namaWorkout}'),
+          backgroundColor: PurplePalette.success,
+        ),
+      );
+
+      // TODO: Navigate to workout detail page
+    } else {
+      // Tampilkan error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['message'] ?? 'Gagal memulai workout'),
+          backgroundColor: PurplePalette.error,
+        ),
+      );
+    }
+  }
+
+  // Method untuk melihat detail workout
+  void _viewWorkoutDetail(Workout workout) {
+    // TODO: Implement workout detail page navigation
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: PurplePalette.cardBackground,
+          title: Text(
+            workout.namaWorkout,
+            style: const TextStyle(
+              color: PurplePalette.textPrimary,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                workout.deskripsi,
+                style: const TextStyle(
+                  color: PurplePalette.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  _buildDetailItem(
+                      Icons.fitness_center, workout.formattedExercises),
+                  const SizedBox(width: 12),
+                  _buildDetailItem(Icons.timer, workout.formattedDuration),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Equipment: ${workout.equipment}',
+                style: const TextStyle(
+                  color: PurplePalette.textSecondary,
+                  fontSize: 12,
+                ),
+              ),
+              if (workout.jadwal != null) ...[
+                const SizedBox(height: 12),
+                Text(
+                  'Jadwal: ${workout.jadwal!.namaJadwal} (${workout.jadwal!.formattedTime})',
+                  style: const TextStyle(
+                    color: PurplePalette.lavender,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                'Tutup',
+                style: TextStyle(color: PurplePalette.textSecondary),
+              ),
+            ),
+            if (workout.isNotStarted)
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _startWorkout(workout);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: PurplePalette.accent,
+                ),
+                child: const Text('Mulai Workout'),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildDetailItem(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          color: PurplePalette.textSecondary,
+          size: 16,
+        ),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: const TextStyle(
+            color: PurplePalette.textSecondary,
+            fontSize: 14,
+          ),
+        ),
+      ],
+    );
   }
 
   // Getter untuk mendapatkan URL foto profile
@@ -156,11 +327,379 @@ class _HomePageState extends State<HomePage> {
 
   // Getter untuk nama user
   String get _userName {
-    if (_isLoading) return 'Loading...';
+    if (_isLoadingUser) return 'Loading...';
     if (_userData?['nama_lengkap'] != null) {
       return _userData!['nama_lengkap'];
     }
     return 'User';
+  }
+
+  Widget _buildLoadingIndicator() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(
+            color: PurplePalette.orchid,
+          ),
+          SizedBox(height: 10),
+          Text(
+            'Memuat...',
+            style: TextStyle(
+              color: PurplePalette.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(String title, String message) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const SizedBox(height: 80),
+        const Icon(
+          FontAwesomeIcons.dumbbell,
+          color: PurplePalette.lilac,
+          size: 48,
+        ),
+        const SizedBox(height: 12),
+        Text(
+          title,
+          style: const TextStyle(
+            color: PurplePalette.textPrimary,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          message,
+          style: const TextStyle(
+            color: PurplePalette.textSecondary,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildChallengeCard(Workout workout) {
+    return GestureDetector(
+      onTap: () => _viewWorkoutDetail(workout),
+      child: Container(
+        width: 300,
+        margin: const EdgeInsets.only(right: 16),
+        decoration: BoxDecoration(
+          color: PurplePalette.cardBackground,
+          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              PurplePalette.eggplant.withOpacity(0.3),
+              PurplePalette.violet.withOpacity(0.3),
+            ],
+          ),
+        ),
+        child: Stack(
+          children: [
+            // Gradient Overlay
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    PurplePalette.background.withOpacity(0.8),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              top: 16,
+              left: 16,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: PurplePalette.orchid.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: PurplePalette.orchid.withOpacity(0.4),
+                  ),
+                ),
+                child: Text(
+                  workout.categoryDisplay,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 16,
+              left: 16,
+              right: 16,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    workout.namaWorkout,
+                    style: const TextStyle(
+                      color: PurplePalette.textPrimary,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    workout.deskripsi,
+                    style: const TextStyle(
+                      color: PurplePalette.textSecondary,
+                      fontSize: 14,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      _buildChallengeInfo(
+                        Icons.timer,
+                        workout.formattedDuration,
+                      ),
+                      const SizedBox(width: 16),
+                      _buildChallengeInfo(
+                        Icons.fitness_center,
+                        workout.formattedExercises,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              top: 16,
+              right: 16,
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: PurplePalette.orchid.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: PurplePalette.orchid.withOpacity(0.4),
+                  ),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.fitness_center,
+                    color: PurplePalette.orchid,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWorkoutHistoryCard(Workout workout) {
+    final statusColor = Color(workout.statusColorCode);
+
+    return GestureDetector(
+      onTap: () => _viewWorkoutDetail(workout),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: PurplePalette.cardBackground,
+          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              PurplePalette.eggplant.withOpacity(0.3),
+              PurplePalette.violet.withOpacity(0.3),
+            ],
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                gradient: LinearGradient(
+                  colors: [
+                    Color(workout.workoutColor).withOpacity(0.3),
+                    Color(workout.workoutColor).withOpacity(0.1),
+                  ],
+                ),
+                border: Border.all(
+                  color: Color(workout.workoutColor).withOpacity(0.5),
+                  width: 2,
+                ),
+              ),
+              child: Center(
+                child: Icon(
+                  workout.workoutIcon,
+                  color: Color(workout.workoutColor),
+                  size: 28,
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        workout.namaWorkout,
+                        style: const TextStyle(
+                          color: PurplePalette.textPrimary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: statusColor.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: statusColor.withOpacity(0.4),
+                          ),
+                        ),
+                        child: Text(
+                          workout.statusText.toUpperCase(),
+                          style: TextStyle(
+                            color: statusColor,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      _buildWorkoutDetail(
+                        Icons.timer,
+                        workout.formattedDuration,
+                      ),
+                      const SizedBox(width: 16),
+                      _buildWorkoutDetail(
+                        Icons.fitness_center,
+                        workout.formattedExercises,
+                      ),
+                      const Spacer(),
+                      if (workout.jadwal != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: PurplePalette.wildberry.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: PurplePalette.wildberry,
+                            ),
+                          ),
+                          child: Text(
+                            workout.jadwal!.kategoriJadwal,
+                            style: const TextStyle(
+                              color: PurplePalette.lavender,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            IconButton(
+              onPressed: () => _viewWorkoutDetail(workout),
+              icon: const Icon(
+                FontAwesomeIcons.chevronRight,
+                color: PurplePalette.textSecondary,
+                size: 20,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChallengeInfo(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          color: PurplePalette.lavender,
+          size: 16,
+        ),
+        const SizedBox(width: 6),
+        Text(
+          text,
+          style: const TextStyle(
+            color: PurplePalette.textSecondary,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWorkoutDetail(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          color: PurplePalette.textSecondary,
+          size: 14,
+        ),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: const TextStyle(
+            color: PurplePalette.textSecondary,
+            fontSize: 14,
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -186,7 +725,7 @@ class _HomePageState extends State<HomePage> {
                       Row(
                         children: [
                           // Foto Profile dengan loading state
-                          _isLoading
+                          _isLoadingUser
                               ? Container(
                                   width: 52,
                                   height: 52,
@@ -257,23 +796,12 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ],
                       ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: const Badge(
-                          backgroundColor: PurplePalette.accent,
-                          child: Icon(
-                            FontAwesomeIcons.bell,
-                            color: PurplePalette.textPrimary,
-                            size: 20,
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),
 
-                /// ================= ERROR MESSAGE =================
-                if (_errorMessage.isNotEmpty)
+                /// ================= ERROR MESSAGES =================
+                if (_userErrorMessage.isNotEmpty)
                   Container(
                     margin:
                         const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -293,7 +821,7 @@ class _HomePageState extends State<HomePage> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            _errorMessage,
+                            _userErrorMessage,
                             style: const TextStyle(
                               color: Colors.red,
                               fontSize: 12,
@@ -303,7 +831,7 @@ class _HomePageState extends State<HomePage> {
                         IconButton(
                           onPressed: () {
                             setState(() {
-                              _errorMessage = '';
+                              _userErrorMessage = '';
                             });
                           },
                           icon: const Icon(
@@ -316,11 +844,50 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
 
+                if (_workoutErrorMessage.isNotEmpty)
+                  Container(
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          FontAwesomeIcons.exclamationTriangle,
+                          color: Colors.orange,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _workoutErrorMessage,
+                            style: const TextStyle(
+                              color: Colors.orange,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: _loadWorkoutData,
+                          icon: const Icon(
+                            FontAwesomeIcons.redo,
+                            color: Colors.orange,
+                            size: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
                 /// ================= DAILY CHALLENGE =================
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         "Workout Challenge",
@@ -329,6 +896,7 @@ class _HomePageState extends State<HomePage> {
                           fontWeight: FontWeight.bold,
                           color: PurplePalette.textPrimary,
                         ),
+                        textAlign: TextAlign.start,
                       ),
                     ],
                   ),
@@ -339,134 +907,28 @@ class _HomePageState extends State<HomePage> {
                 /// ================= CHALLENGE CAROUSEL =================
                 SizedBox(
                   height: 200,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: workoutChallenges.length,
-                    itemBuilder: (context, index) {
-                      final challenge = workoutChallenges[index];
-                      return GestureDetector(
-                        onTap: () {},
-                        child: Container(
-                          width: 300,
-                          margin: EdgeInsets.only(
-                            right:
-                                index < workoutChallenges.length - 1 ? 16 : 0,
-                          ),
-                          decoration: BoxDecoration(
-                            color: PurplePalette.cardBackground,
-                            borderRadius: BorderRadius.circular(16),
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                PurplePalette.eggplant.withOpacity(0.3),
-                                PurplePalette.cardBackground,
-                              ],
+                  child: _isLoadingWorkouts
+                      ? _buildLoadingIndicator()
+                      : _workoutChallenges.isEmpty
+                          ? _buildEmptyState(
+                              'No Challenges Today',
+                              'All workouts are completed or in progress!',
+                            )
+                          : ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              itemCount: _workoutChallenges.length,
+                              itemBuilder: (context, index) {
+                                final workout = _workoutChallenges[index];
+                                return _buildChallengeCard(workout);
+                              },
                             ),
-                            border: Border.all(
-                              color: PurplePalette.mauve.withOpacity(0.3),
-                              width: 1,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: PurplePalette.violet.withOpacity(0.1),
-                                blurRadius: 10,
-                                spreadRadius: 1,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Stack(
-                            children: [
-                              // Gradient Overlay
-                              Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      Colors.transparent,
-                                      PurplePalette.background.withOpacity(0.8),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                top: 16,
-                                left: 16,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: PurplePalette.orchid.withOpacity(0.8),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    challenge["kategori"],
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 1,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                bottom: 16,
-                                left: 16,
-                                right: 16,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      challenge["nama_workout"],
-                                      style: const TextStyle(
-                                        color: PurplePalette.textPrimary,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      challenge["deskripsi"],
-                                      style: const TextStyle(
-                                        color: PurplePalette.textSecondary,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Row(
-                                      children: [
-                                        _buildChallengeInfo(
-                                          FontAwesomeIcons.clock,
-                                          challenge["durasi_workout"],
-                                        ),
-                                        const SizedBox(width: 16),
-                                        _buildChallengeInfo(
-                                          FontAwesomeIcons.fire,
-                                          challenge["status"],
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
                 ),
                 const SizedBox(height: 14),
 
-                /// ================= USER STATS (Optional) =================
-                if (_userData != null && !_isLoading)
+                /// ================= USER STATS =================
+                if (_userData != null && !_isLoadingUser)
                   Padding(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -546,12 +1008,12 @@ class _HomePageState extends State<HomePage> {
                   ),
 
                 /// ================= COMPLETED WORKOUTS =================
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         "Workout History",
                         style: TextStyle(
                           fontSize: 20,
@@ -559,36 +1021,25 @@ class _HomePageState extends State<HomePage> {
                           color: PurplePalette.textPrimary,
                         ),
                       ),
-                      TextButton(
-                        onPressed: () {},
-                        child: const Row(
-                          children: [
-                            Text(
-                              "View All",
-                              style: TextStyle(
-                                color: PurplePalette.lavender,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(width: 4),
-                            Icon(
-                              FontAwesomeIcons.chevronRight,
-                              color: PurplePalette.lavender,
-                              size: 12,
-                            ),
-                          ],
-                        ),
-                      ),
                     ],
                   ),
                 ),
+
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),
-                  child: Column(
-                    children: completedWorkouts.map((workout) {
-                      return _buildWorkoutCard(workout);
-                    }).toList(),
-                  ),
+                  child: _isLoadingWorkouts
+                      ? _buildLoadingIndicator()
+                      : _completedWorkouts.isEmpty
+                          ? _buildEmptyState(
+                              'No History Today',
+                              'Complete your first workout to see it here!',
+                            )
+                          : Column(
+                              children: _completedWorkouts
+                                  .map((workout) =>
+                                      _buildWorkoutHistoryCard(workout))
+                                  .toList(),
+                            ),
                 ),
               ],
             ),
@@ -663,6 +1114,27 @@ class _HomePageState extends State<HomePage> {
                 ),
                 const SizedBox(height: 20),
 
+                // Today's Workout Stats
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: PurplePalette.background,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildUserInfoItem(
+                          'Workouts', '${_workoutStats['total']}'),
+                      _buildUserInfoItem(
+                          'Completed', '${_workoutStats['completed']}'),
+                      _buildUserInfoItem(
+                          'Pending', '${_workoutStats['not_started']}'),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+
                 // Button Tutup
                 ElevatedButton(
                   onPressed: () {
@@ -703,190 +1175,6 @@ class _HomePageState extends State<HomePage> {
             color: PurplePalette.textPrimary,
             fontSize: 16,
             fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildChallengeInfo(IconData icon, String text) {
-    return Row(
-      children: [
-        Icon(
-          icon,
-          color: PurplePalette.lavender,
-          size: 16,
-        ),
-        const SizedBox(width: 6),
-        Text(
-          text,
-          style: const TextStyle(
-            color: PurplePalette.textSecondary,
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildWorkoutCard(Map<String, dynamic> workout) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: PurplePalette.cardBackground,
-        borderRadius: BorderRadius.circular(16),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            PurplePalette.orchid.withOpacity(0.1),
-            PurplePalette.cardBackground,
-          ],
-        ),
-        border: Border.all(
-          color: PurplePalette.orchid.withOpacity(0.3),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: PurplePalette.orchid.withOpacity(0.1),
-            blurRadius: 10,
-            spreadRadius: 1,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              gradient: LinearGradient(
-                colors: [
-                  PurplePalette.eggplant.withOpacity(0.8),
-                  PurplePalette.violet.withOpacity(0.8),
-                ],
-              ),
-            ),
-            child: Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    PurplePalette.orchid.withOpacity(0.3),
-                    PurplePalette.lavender.withOpacity(0.1),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: PurplePalette.orchid.withOpacity(0.5),
-                  width: 2,
-                ),
-              ),
-              child: const Center(
-                child: Icon(
-                  Icons.fitness_center,
-                  color: PurplePalette.orchid,
-                  size: 28,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      workout["nama_workout"] as String,
-                      style: const TextStyle(
-                        color: PurplePalette.textPrimary,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: PurplePalette.orchid.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: PurplePalette.orchid.withOpacity(0.4),
-                        ),
-                      ),
-                      child: Text(
-                        workout["category"] as String,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    _buildWorkoutDetail(
-                      FontAwesomeIcons.clock,
-                      workout["durasi_workout"] as String,
-                    ),
-                    const SizedBox(width: 16),
-                    _buildWorkoutDetail(
-                      FontAwesomeIcons.fire,
-                      workout["status"] as String,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              FontAwesomeIcons.chevronRight,
-              color: PurplePalette.textSecondary,
-              size: 20,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildWorkoutDetail(IconData icon, String text) {
-    return Row(
-      children: [
-        Icon(
-          icon,
-          color: PurplePalette.textSecondary,
-          size: 14,
-        ),
-        const SizedBox(width: 4),
-        Text(
-          text,
-          style: const TextStyle(
-            color: PurplePalette.textSecondary,
-            fontSize: 14,
           ),
         ),
       ],

@@ -26,12 +26,16 @@ class PurplePalette {
   static const Color info = Color(0xFF2196F3);
   static const Color warning = Color(0xFFFF9800);
   static const Color error = Color(0xFFF44336);
-  
+
   // Workout category colors
-  static const Color equipmentColor = Color(0xFF4FC3F7); // Biru untuk with equipment
-  static const Color bodyweightColor = Color(0xFF66BB6A); // Hijau untuk without equipment
-  static const Color completedColor = Color(0xFF4CAF50); // Hijau untuk completed
-  static const Color progressColor = Color(0xFFFF9800); // Orange untuk in progress
+  static const Color equipmentColor =
+      Color(0xFF4FC3F7); // Biru untuk with equipment
+  static const Color bodyweightColor =
+      Color(0xFF66BB6A); // Hijau untuk without equipment
+  static const Color completedColor =
+      Color(0xFF4CAF50); // Hijau untuk completed
+  static const Color progressColor =
+      Color(0xFFFF9800); // Orange untuk in progress
 }
 
 class WorkoutPlanPage extends StatefulWidget {
@@ -88,42 +92,23 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
 
   List<Workout> _getFilteredWorkouts() {
     if (_workoutResponse == null) return [];
-    
+
     if (_selectedCategory == 0) {
       return _workoutResponse!.workouts;
     } else if (_selectedCategory == 1) {
       return _workoutResponse!.workouts
-          .where((workout) => !workout.equipment.toLowerCase().contains('no equipment') && 
-                            !workout.equipment.toLowerCase().contains('bodyweight') &&
-                            workout.equipment.isNotEmpty)
+          .where((workout) =>
+              !workout.equipment.toLowerCase().contains('no equipment') &&
+              !workout.equipment.toLowerCase().contains('bodyweight') &&
+              workout.equipment.isNotEmpty)
           .toList();
     } else {
       return _workoutResponse!.workouts
-          .where((workout) => workout.equipment.toLowerCase().contains('no equipment') || 
-                            workout.equipment.toLowerCase().contains('bodyweight') ||
-                            workout.equipment.isEmpty)
+          .where((workout) =>
+              workout.equipment.toLowerCase().contains('no equipment') ||
+              workout.equipment.toLowerCase().contains('bodyweight') ||
+              workout.equipment.isEmpty)
           .toList();
-    }
-  }
-
-  Color _getWorkoutColor(Workout workout) {
-    if (_selectedCategory == 1 || workout.workoutColor == 'equipment') {
-      return PurplePalette.equipmentColor;
-    } else if (_selectedCategory == 2 || workout.workoutColor == 'bodyweight') {
-      return PurplePalette.bodyweightColor;
-    }
-    
-    switch (workout.workoutColor) {
-      case 'yoga':
-        return Colors.green;
-      case 'cardio':
-        return Colors.red;
-      case 'strength':
-        return Colors.blue;
-      case 'hiit':
-        return Colors.orange;
-      default:
-        return PurplePalette.orchid;
     }
   }
 
@@ -150,8 +135,8 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
       return FontAwesomeIcons.spa;
     } else if (workout.kategori.toLowerCase().contains('cardio')) {
       return FontAwesomeIcons.running;
-    } else if (workout.kategori.toLowerCase().contains('strength') || 
-               workout.kategori.toLowerCase().contains('muscle')) {
+    } else if (workout.kategori.toLowerCase().contains('strength') ||
+        workout.kategori.toLowerCase().contains('muscle')) {
       return FontAwesomeIcons.dumbbell;
     }
     return FontAwesomeIcons.fire;
@@ -255,7 +240,6 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
   }
 
   Widget _buildWorkoutCard(Workout workout) {
-    final workoutColor = _getWorkoutColor(workout);
     final statusColor = _getStatusColor(workout);
     final statusIcon = _getStatusIcon(workout);
     final workoutIcon = _getWorkoutIcon(workout);
@@ -296,21 +280,23 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
                       height: 48,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
                           colors: [
-                            workoutColor.withOpacity(0.3),
-                            workoutColor.withOpacity(0.1),
+                            PurplePalette.orchid.withOpacity(0.3),
+                            PurplePalette.lavender.withOpacity(0.1),
                           ],
                         ),
-                        shape: BoxShape.circle,
+                        borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: workoutColor.withOpacity(0.5),
+                          color: PurplePalette.orchid.withOpacity(0.5),
                           width: 2,
                         ),
                       ),
                       child: Center(
                         child: Icon(
                           workoutIcon,
-                          color: workoutColor,
+                          color: PurplePalette.orchid,
                           size: 20,
                         ),
                       ),
@@ -358,16 +344,18 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: workoutColor.withOpacity(0.1),
+                        color: PurplePalette.orchid.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: workoutColor.withOpacity(0.3),
+                          color: PurplePalette.orchid.withOpacity(0.3),
                         ),
                       ),
                       child: Text(
-                        workout.equipment.isNotEmpty ? workout.equipment : 'No Equipment',
-                        style: TextStyle(
-                          color: workoutColor,
+                        workout.equipment.isNotEmpty
+                            ? workout.equipment
+                            : 'No Equipment',
+                        style: const TextStyle(
+                          color: PurplePalette.orchid,
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1,
@@ -388,7 +376,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
                         ),
                       ),
                       child: Row(
-                        mainAxisSize: MainAxisSize.min, 
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
                             statusIcon,
@@ -563,7 +551,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
                 ),
               ),
             ),
-            
+
             /// ================= HEADER =================
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -624,7 +612,8 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
                               ),
                               child: Column(
                                 children: [
-                                  ...filteredWorkouts.map((workout) => _buildWorkoutCard(workout)),
+                                  ...filteredWorkouts.map(
+                                      (workout) => _buildWorkoutCard(workout)),
                                   const SizedBox(height: 80),
                                 ],
                               ),
