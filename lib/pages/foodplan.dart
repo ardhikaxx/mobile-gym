@@ -373,13 +373,13 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
                       value: food.formattedProtein,
                       color: PurplePalette.protein,
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 8),
                     _buildMacroPill(
                       icon: FontAwesomeIcons.breadSlice,
                       value: food.formattedCarbs,
                       color: PurplePalette.carbs,
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 8),
                     _buildMacroPill(
                       icon: FontAwesomeIcons.cheese,
                       value: food.formattedFat,
@@ -401,7 +401,7 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
     required Color color,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
