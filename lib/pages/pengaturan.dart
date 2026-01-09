@@ -684,15 +684,6 @@ class _PengaturanPageState extends State<PengaturanPage> {
                           },
                         },
                         {
-                          "icon": FontAwesomeIcons.palette,
-                          "title": "App Theme",
-                          "subtitle": "Change app appearance",
-                          "color": PurplePalette.orchid,
-                          "onTap": () {
-                            _showComingSoon(context);
-                          },
-                        },
-                        {
                           "icon": FontAwesomeIcons.shieldAlt,
                           "title": "Security",
                           "subtitle": "Security and password settings",
@@ -1036,104 +1027,6 @@ class _PengaturanPageState extends State<PengaturanPage> {
                 ),
               ),
               child: const Text("Close"),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showComingSoon(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: PurplePalette.cardBackground,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: BorderSide(
-            color: PurplePalette.lavender.withOpacity(0.3),
-          ),
-        ),
-        title: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: PurplePalette.lavender.withOpacity(0.2),
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: PurplePalette.lavender,
-                ),
-              ),
-              child: const Center(
-                child: Icon(
-                  FontAwesomeIcons.hourglassHalf,
-                  color: PurplePalette.lavender,
-                  size: 20,
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Text(
-              "Coming Soon",
-              style: TextStyle(
-                color: PurplePalette.textPrimary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              FontAwesomeIcons.tools,
-              color: PurplePalette.lavender,
-              size: 48,
-            ),
-            SizedBox(height: 16),
-            Text(
-              "This feature is currently under development.",
-              style: TextStyle(
-                color: PurplePalette.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 8),
-            Text(
-              "We're working hard to bring you the best experience.",
-              style: TextStyle(
-                color: PurplePalette.textSecondary,
-                fontSize: 12,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-        actions: [
-          Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              gradient: LinearGradient(
-                colors: [
-                  PurplePalette.eggplant.withOpacity(0.8),
-                  PurplePalette.violet.withOpacity(0.8),
-                ],
-              ),
-            ),
-            child: ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                foregroundColor: PurplePalette.textPrimary,
-                shadowColor: Colors.transparent,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text("Okay"),
             ),
           ),
         ],
