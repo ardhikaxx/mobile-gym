@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_application_1/service/auth_services.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_application_1/providers/theme_provider.dart';
 
 /// ================= PALETTE WARNA UNGU =================
 class PurplePalette {
@@ -104,8 +106,10 @@ class _EditProfilPageState extends State<EditProfilPage> {
           _userData = userData;
           _namaController.text = userData['nama_lengkap'] ?? '';
           _jenisKelamin = userData['jenis_kelamin'];
-          _tinggiBadanController.text = userData['tinggi_badan']?.toString() ?? '';
-          _beratBadanController.text = userData['berat_badan']?.toString() ?? '';
+          _tinggiBadanController.text =
+              userData['tinggi_badan']?.toString() ?? '';
+          _beratBadanController.text =
+              userData['berat_badan']?.toString() ?? '';
           _alergiController.text = userData['alergi'] ?? '';
           _golonganDarah = userData['golongan_darah'];
           _isLoading = false;
@@ -151,12 +155,10 @@ class _EditProfilPageState extends State<EditProfilPage> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-
     if (_jenisKelamin == null) {
       _showSnackBar('Pilih jenis kelamin terlebih dahulu');
       return;
     }
-
     _safeSetState(() {
       _isSaving = true;
       _errorMessage = '';
@@ -185,14 +187,9 @@ class _EditProfilPageState extends State<EditProfilPage> {
           _safeSetState(() {
             _successMessage = result['message'];
             _isSaving = false;
-            // Update local user data
             _userData = result['data']['pengguna'];
           });
-
-          // Tampilkan dialog sukses
           _showSuccessDialog(result['message']);
-
-          // Refresh data setelah 2 detik
           Future.delayed(const Duration(seconds: 2), () {
             if (_isMounted) {
               _loadUserData();
@@ -216,6 +213,8 @@ class _EditProfilPageState extends State<EditProfilPage> {
   }
 
   void _showSuccessDialog(String message) {
+    Provider.of<ThemeProvider>(context, listen: false);
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -228,34 +227,35 @@ class _EditProfilPageState extends State<EditProfilPage> {
         });
 
         return AlertDialog(
-          backgroundColor: PurplePalette.cardBackground,
+          backgroundColor: Theme.of(context).cardColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
             side: BorderSide(
-              color: PurplePalette.lavender.withOpacity(0.3),
+              color: Theme.of(context).primaryColor.withOpacity(0.3),
             ),
           ),
-          title: const Text(
-                "Sukses!",
-                style: TextStyle(
-                  color: PurplePalette.textPrimary,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
+          title: Text(
+            "Sukses!",
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 FontAwesomeIcons.userCheck,
-                color: PurplePalette.lavender,
+                color: Theme.of(context).primaryColor,
                 size: 48,
               ),
               const SizedBox(height: 16),
               Text(
                 message,
-                style: const TextStyle(
-                  color: PurplePalette.textSecondary,
+                style: TextStyle(
+                  color:
+                      Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -263,7 +263,8 @@ class _EditProfilPageState extends State<EditProfilPage> {
               Text(
                 "Data akan diperbarui dalam beberapa detik...",
                 style: TextStyle(
-                  color: PurplePalette.textSecondary.withOpacity(0.7),
+                  color:
+                      Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                   fontSize: 12,
                 ),
                 textAlign: TextAlign.center,
@@ -280,7 +281,7 @@ class _EditProfilPageState extends State<EditProfilPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
-          backgroundColor: Colors.red,
+          backgroundColor: Theme.of(context).colorScheme.error,
           duration: const Duration(seconds: 2),
         ),
       );
@@ -325,10 +326,12 @@ class _EditProfilPageState extends State<EditProfilPage> {
 
   @override
   Widget build(BuildContext context) {
+    Provider.of<ThemeProvider>(context);
+
     return Scaffold(
-      backgroundColor: PurplePalette.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: PurplePalette.background,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
         leading: IconButton(
           onPressed: () {
@@ -338,23 +341,20 @@ class _EditProfilPageState extends State<EditProfilPage> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: PurplePalette.cardBackground,
+              color: Theme.of(context).primaryColor,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: PurplePalette.mauve.withOpacity(0.5),
-              ),
             ),
             child: const Icon(
               Icons.arrow_back_ios_new_rounded,
-              color: PurplePalette.textPrimary,
+              color: Colors.white,
               size: 20,
             ),
           ),
         ),
-        title: const Text(
+        title: Text(
           "Edit Profile",
           style: TextStyle(
-            color: PurplePalette.textPrimary,
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 26,
             fontWeight: FontWeight.bold,
             fontFamily: 'Poppins',
@@ -363,14 +363,14 @@ class _EditProfilPageState extends State<EditProfilPage> {
         centerTitle: true,
         actions: [
           if (_isSaving)
-            const Padding(
-              padding: EdgeInsets.only(right: 16),
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
               child: Center(
                 child: SizedBox(
                   width: 24,
                   height: 24,
                   child: CircularProgressIndicator(
-                    color: PurplePalette.accent,
+                    color: Theme.of(context).primaryColor,
                     strokeWidth: 2,
                   ),
                 ),
@@ -379,9 +379,9 @@ class _EditProfilPageState extends State<EditProfilPage> {
         ],
       ),
       body: _isLoading
-          ? const Center(
+          ? Center(
               child: CircularProgressIndicator(
-                color: PurplePalette.accent,
+                color: Theme.of(context).primaryColor,
               ),
             )
           : SingleChildScrollView(
@@ -397,15 +397,15 @@ class _EditProfilPageState extends State<EditProfilPage> {
                         margin: const EdgeInsets.only(bottom: 16),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: PurplePalette.success.withOpacity(0.1),
+                          color: Colors.green.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: PurplePalette.success),
+                          border: Border.all(color: Colors.green),
                         ),
                         child: Row(
                           children: [
                             const Icon(
                               FontAwesomeIcons.checkCircle,
-                              color: PurplePalette.success,
+                              color: Colors.green,
                               size: 16,
                             ),
                             const SizedBox(width: 8),
@@ -413,7 +413,7 @@ class _EditProfilPageState extends State<EditProfilPage> {
                               child: Text(
                                 _successMessage,
                                 style: const TextStyle(
-                                  color: PurplePalette.success,
+                                  color: Colors.green,
                                 ),
                               ),
                             ),
@@ -429,7 +429,8 @@ class _EditProfilPageState extends State<EditProfilPage> {
                         decoration: BoxDecoration(
                           color: Colors.red.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.red.withOpacity(0.3)),
+                          border:
+                              Border.all(color: Colors.red.withOpacity(0.3)),
                         ),
                         child: Row(
                           children: [
@@ -495,23 +496,33 @@ class _EditProfilPageState extends State<EditProfilPage> {
                                             _fotoProfile!,
                                             fit: BoxFit.cover,
                                           )
-                                        : (_userData?['foto_profile_url'] != null
+                                        : (_userData?['foto_profile_url'] !=
+                                                null
                                             ? Image.network(
                                                 _userData!['foto_profile_url'],
                                                 fit: BoxFit.cover,
-                                                loadingBuilder: (context, child, loadingProgress) {
-                                                  if (loadingProgress == null) return child;
+                                                loadingBuilder: (context, child,
+                                                    loadingProgress) {
+                                                  if (loadingProgress == null)
+                                                    return child;
                                                   return Center(
-                                                    child: CircularProgressIndicator(
-                                                      value: loadingProgress.expectedTotalBytes != null
-                                                          ? loadingProgress.cumulativeBytesLoaded /
-                                                              loadingProgress.expectedTotalBytes!
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                      value: loadingProgress
+                                                                  .expectedTotalBytes !=
+                                                              null
+                                                          ? loadingProgress
+                                                                  .cumulativeBytesLoaded /
+                                                              loadingProgress
+                                                                  .expectedTotalBytes!
                                                           : null,
-                                                      color: PurplePalette.lavender,
+                                                      color: PurplePalette
+                                                          .lavender,
                                                     ),
                                                   );
                                                 },
-                                                errorBuilder: (context, error, stackTrace) {
+                                                errorBuilder: (context, error,
+                                                    stackTrace) {
                                                   return const Icon(
                                                     FontAwesomeIcons.user,
                                                     color: Colors.white,
@@ -530,21 +541,21 @@ class _EditProfilPageState extends State<EditProfilPage> {
                                   width: 40,
                                   height: 40,
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: Theme.of(context).cardColor,
                                     shape: BoxShape.circle,
                                     boxShadow: [
                                       BoxShadow(
-                                        color: PurplePalette.lavender.withOpacity(0.5),
+                                        color: Colors.black.withOpacity(0.3),
                                         blurRadius: 8,
                                         spreadRadius: 1,
                                         offset: const Offset(0, 2),
                                       ),
                                     ],
                                   ),
-                                  child: const Center(
+                                  child: Center(
                                     child: Icon(
                                       FontAwesomeIcons.camera,
-                                      color: PurplePalette.accent,
+                                      color: Theme.of(context).primaryColor,
                                       size: 18,
                                     ),
                                   ),
@@ -554,9 +565,11 @@ class _EditProfilPageState extends State<EditProfilPage> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            _fotoProfile != null ? "Foto baru terpilih" : "Klik untuk ubah foto",
-                            style: const TextStyle(
-                              color: PurplePalette.lavender,
+                            _fotoProfile != null
+                                ? "Foto baru terpilih"
+                                : "Klik untuk ubah foto",
+                            style: TextStyle(
+                              color: Theme.of(context).primaryColor,
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                             ),
@@ -569,6 +582,7 @@ class _EditProfilPageState extends State<EditProfilPage> {
 
                     /// ================= NAMA LENGKAP =================
                     _buildTextField(
+                      context: context,
                       controller: _namaController,
                       label: "Nama Lengkap",
                       hint: "Masukkan nama lengkap Anda",
@@ -582,10 +596,10 @@ class _EditProfilPageState extends State<EditProfilPage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           "Jenis Kelamin *",
                           style: TextStyle(
-                            color: PurplePalette.textPrimary,
+                            color: Theme.of(context).colorScheme.onSurface,
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                           ),
@@ -595,6 +609,7 @@ class _EditProfilPageState extends State<EditProfilPage> {
                           children: [
                             Expanded(
                               child: _buildGenderOption(
+                                context: context,
                                 value: 'L',
                                 label: 'Laki-laki',
                                 icon: FontAwesomeIcons.mars,
@@ -604,6 +619,7 @@ class _EditProfilPageState extends State<EditProfilPage> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: _buildGenderOption(
+                                context: context,
                                 value: 'P',
                                 label: 'Perempuan',
                                 icon: FontAwesomeIcons.venus,
@@ -622,6 +638,7 @@ class _EditProfilPageState extends State<EditProfilPage> {
                       children: [
                         Expanded(
                           child: _buildTextField(
+                            context: context,
                             controller: _tinggiBadanController,
                             label: "Tinggi Badan (cm)",
                             hint: "Contoh: 175 (50-250 cm)",
@@ -633,6 +650,7 @@ class _EditProfilPageState extends State<EditProfilPage> {
                         const SizedBox(width: 16),
                         Expanded(
                           child: _buildTextField(
+                            context: context,
                             controller: _beratBadanController,
                             label: "Berat Badan (kg)",
                             hint: "Contoh: 70 (20-300 kg)",
@@ -659,10 +677,13 @@ class _EditProfilPageState extends State<EditProfilPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
+                            Text(
                               "BMI Anda:",
                               style: TextStyle(
-                                color: PurplePalette.textSecondary,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withOpacity(0.7),
                                 fontSize: 14,
                               ),
                             ),
@@ -681,9 +702,12 @@ class _EditProfilPageState extends State<EditProfilPage> {
                               child: Column(
                                 children: [
                                   Text(
-                                    _userData!['bmi']?.toStringAsFixed(1) ?? '0.0',
-                                    style: const TextStyle(
-                                      color: Colors.white,
+                                    _userData!['bmi']?.toStringAsFixed(1) ??
+                                        '0.0',
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -706,6 +730,7 @@ class _EditProfilPageState extends State<EditProfilPage> {
 
                     /// ================= ALERGI =================
                     _buildTextField(
+                      context: context,
                       controller: _alergiController,
                       label: "Alergi (Opsional)",
                       hint: "Contoh: udang, kacang, seafood",
@@ -719,10 +744,10 @@ class _EditProfilPageState extends State<EditProfilPage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           "Golongan Darah",
                           style: TextStyle(
-                            color: PurplePalette.textPrimary,
+                            color: Theme.of(context).colorScheme.onSurface,
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                           ),
@@ -731,27 +756,30 @@ class _EditProfilPageState extends State<EditProfilPage> {
                         Container(
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: PurplePalette.cardBackground,
+                            color: Theme.of(context).cardColor,
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
-                              color: PurplePalette.mauve.withOpacity(0.3),
+                              color: Theme.of(context).dividerColor,
                             ),
                           ),
                           child: DropdownButtonHideUnderline(
                             child: DropdownButton<String>(
                               value: _golonganDarah,
                               isExpanded: true,
-                              dropdownColor: PurplePalette.cardBackground,
-                              icon: const Padding(
-                                padding: EdgeInsets.only(right: 12),
+                              dropdownColor: Theme.of(context).cardColor,
+                              icon: Padding(
+                                padding: const EdgeInsets.only(right: 12),
                                 child: Icon(
                                   FontAwesomeIcons.chevronDown,
-                                  color: PurplePalette.textSecondary,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withOpacity(0.7),
                                   size: 18,
                                 ),
                               ),
-                              style: const TextStyle(
-                                color: PurplePalette.textPrimary,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface,
                                 fontSize: 16,
                               ),
                               hint: Padding(
@@ -759,7 +787,10 @@ class _EditProfilPageState extends State<EditProfilPage> {
                                 child: Text(
                                   "Pilih Golongan Darah",
                                   style: TextStyle(
-                                    color: PurplePalette.textSecondary.withOpacity(0.7),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withOpacity(0.7),
                                   ),
                                 ),
                               ),
@@ -772,8 +803,13 @@ class _EditProfilPageState extends State<EditProfilPage> {
                                       item['label'],
                                       style: TextStyle(
                                         color: item['value'] == null
-                                            ? PurplePalette.textSecondary.withOpacity(0.7)
-                                            : PurplePalette.textPrimary,
+                                            ? Theme.of(context)
+                                                .colorScheme
+                                                .onSurface
+                                                .withOpacity(0.7)
+                                            : Theme.of(context)
+                                                .colorScheme
+                                                .onSurface,
                                       ),
                                     ),
                                   ),
@@ -804,7 +840,7 @@ class _EditProfilPageState extends State<EditProfilPage> {
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: PurplePalette.violet.withOpacity(0.3),
+                            color: Colors.black.withOpacity(0.3),
                             blurRadius: 15,
                             spreadRadius: 2,
                             offset: const Offset(0, 4),
@@ -815,7 +851,7 @@ class _EditProfilPageState extends State<EditProfilPage> {
                         onPressed: _isSaving ? null : _updateProfile,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
-                          foregroundColor: PurplePalette.textPrimary,
+                          foregroundColor: Colors.white,
                           shadowColor: Colors.transparent,
                           minimumSize: const Size(double.infinity, 56),
                           shape: RoundedRectangleBorder(
@@ -858,8 +894,7 @@ class _EditProfilPageState extends State<EditProfilPage> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: PurplePalette.mauve.withOpacity(0.5),
-                        ),
+                            color: Theme.of(context).primaryColor, width: 1.8),
                       ),
                       child: ElevatedButton(
                         onPressed: _isSaving
@@ -869,24 +904,27 @@ class _EditProfilPageState extends State<EditProfilPage> {
                               },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
-                          foregroundColor: PurplePalette.textSecondary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.onSurface,
                           shadowColor: Colors.transparent,
                           minimumSize: const Size(double.infinity, 56),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
                               FontAwesomeIcons.times,
+                              color: Theme.of(context).primaryColor,
                               size: 20,
                             ),
-                            SizedBox(width: 12),
+                            const SizedBox(width: 12),
                             Text(
                               "Batal",
                               style: TextStyle(
+                                color: Theme.of(context).primaryColor,
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -905,6 +943,7 @@ class _EditProfilPageState extends State<EditProfilPage> {
   }
 
   Widget _buildTextField({
+    required BuildContext context,
     required TextEditingController controller,
     required String label,
     required String hint,
@@ -918,8 +957,8 @@ class _EditProfilPageState extends State<EditProfilPage> {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: PurplePalette.textPrimary,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
@@ -930,17 +969,17 @@ class _EditProfilPageState extends State<EditProfilPage> {
           validator: validator,
           keyboardType: keyboardType,
           maxLines: maxLines,
-          style: const TextStyle(color: PurplePalette.textPrimary),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
           decoration: InputDecoration(
             filled: true,
-            fillColor: PurplePalette.cardBackground,
+            fillColor: Theme.of(context).cardColor,
             hintText: hint,
             hintStyle: TextStyle(
-              color: PurplePalette.textSecondary.withOpacity(0.7),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
             ),
             prefixIcon: Icon(
               icon,
-              color: PurplePalette.textSecondary,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
               size: 20,
             ),
             border: OutlineInputBorder(
@@ -949,23 +988,30 @@ class _EditProfilPageState extends State<EditProfilPage> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: PurplePalette.accent,
+              borderSide: BorderSide(
+                color: Theme.of(context).primaryColor,
                 width: 2,
               ),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: Colors.red,
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.error,
                 width: 1,
               ),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: Colors.red,
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.error,
                 width: 2,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(
+                color: Theme.of(context).dividerColor,
+                width: 1,
               ),
             ),
           ),
@@ -975,6 +1021,7 @@ class _EditProfilPageState extends State<EditProfilPage> {
   }
 
   Widget _buildGenderOption({
+    required BuildContext context,
     required String value,
     required String label,
     required IconData icon,
@@ -990,11 +1037,13 @@ class _EditProfilPageState extends State<EditProfilPage> {
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         decoration: BoxDecoration(
           color: isSelected
-              ? PurplePalette.orchid.withOpacity(0.2)
-              : PurplePalette.cardBackground,
+              ? Theme.of(context).primaryColor.withOpacity(0.2)
+              : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? PurplePalette.orchid : PurplePalette.mauve.withOpacity(0.3),
+            color: isSelected
+                ? Theme.of(context).primaryColor
+                : Theme.of(context).dividerColor,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -1003,14 +1052,18 @@ class _EditProfilPageState extends State<EditProfilPage> {
           children: [
             Icon(
               icon,
-              color: isSelected ? PurplePalette.lavender : PurplePalette.textSecondary,
+              color: isSelected
+                  ? Theme.of(context).primaryColor
+                  : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
               size: 18,
             ),
             const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? PurplePalette.textPrimary : PurplePalette.textSecondary,
+                color: isSelected
+                    ? Theme.of(context).primaryColor
+                    : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
             ),

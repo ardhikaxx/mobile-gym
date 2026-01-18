@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_application_1/service/workout_services.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_application_1/providers/theme_provider.dart';
 
 /// ================= PALETTE WARNA UNGU =================
 class PurplePalette {
@@ -143,18 +145,18 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
   }
 
   Widget _buildLoadingState() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(
-            color: PurplePalette.orchid,
+            color: Theme.of(context).primaryColor,
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Text(
             'Memuat data workout...',
             style: TextStyle(
-              color: PurplePalette.textSecondary,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
               fontSize: 16,
             ),
           ),
@@ -176,8 +178,8 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
           const SizedBox(height: 20),
           Text(
             _errorMessage,
-            style: const TextStyle(
-              color: PurplePalette.textPrimary,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 16,
               fontWeight: FontWeight.w500,
             ),
@@ -187,7 +189,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
           ElevatedButton(
             onPressed: _loadWorkouts,
             style: ElevatedButton.styleFrom(
-              backgroundColor: PurplePalette.accent,
+              backgroundColor: Theme.of(context).primaryColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -207,29 +209,29 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
   }
 
   Widget _buildEmptyState() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             FontAwesomeIcons.dumbbell,
-            color: PurplePalette.lilac,
+            color: Theme.of(context).primaryColor.withOpacity(0.7),
             size: 64,
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Text(
             'Tidak ada workout hari ini',
             style: TextStyle(
-              color: PurplePalette.textPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 18,
               fontWeight: FontWeight.w600,
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Text(
             'Lihat jadwal workout untuk menambahkan kegiatan',
             style: TextStyle(
-              color: PurplePalette.textSecondary,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
               fontSize: 14,
             ),
             textAlign: TextAlign.center,
@@ -252,7 +254,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
         margin: const EdgeInsets.symmetric(vertical: 8),
         child: Container(
           decoration: BoxDecoration(
-            color: PurplePalette.cardBackground,
+            color: Theme.of(context).primaryColor,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: PurplePalette.mauve.withOpacity(0.3),
@@ -260,7 +262,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
             ),
             boxShadow: [
               BoxShadow(
-                color: PurplePalette.violet.withOpacity(0.1),
+                color: Colors.black.withOpacity(0.2),
                 blurRadius: 10,
                 spreadRadius: 1,
                 offset: const Offset(0, 4),
@@ -279,14 +281,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            PurplePalette.orchid.withOpacity(0.3),
-                            PurplePalette.lavender.withOpacity(0.1),
-                          ],
-                        ),
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: PurplePalette.orchid.withOpacity(0.5),
@@ -296,20 +291,60 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
                       child: Center(
                         child: Icon(
                           workoutIcon,
-                          color: PurplePalette.orchid,
+                          color: Theme.of(context).primaryColor,
                           size: 20,
                         ),
                       ),
                     ),
-                    IconButton(
-                      onPressed: () {
-                        // TODO: Show workout actions
+                    PopupMenuButton<String>(
+                      onSelected: (value) {
+                        if (value == 'detail') {
+                          // TODO: Show workout detail
+                        } else if (value == 'start') {
+                          // TODO: Start workout
+                        }
                       },
-                      icon: const Icon(
-                        FontAwesomeIcons.ellipsisVertical,
-                        color: PurplePalette.textSecondary,
-                        size: 20,
+                      icon: Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            FontAwesomeIcons.ellipsisVertical,
+                            color: Theme.of(context).primaryColor,
+                            size: 16,
+                          ),
+                        ),
                       ),
+                      itemBuilder: (context) => [
+                        const PopupMenuItem<String>(
+                          value: 'detail',
+                          child: Row(
+                            children: [
+                              Icon(FontAwesomeIcons.infoCircle, size: 16),
+                              SizedBox(width: 8),
+                              Text('Detail'),
+                            ],
+                          ),
+                        ),
+                        if (!workout.isCompleted)
+                          const PopupMenuItem<String>(
+                            value: 'start',
+                            child: Row(
+                              children: [
+                                Icon(FontAwesomeIcons.play, size: 16),
+                                SizedBox(width: 8),
+                                Text('Mulai Workout'),
+                              ],
+                            ),
+                          ),
+                      ],
                     ),
                   ],
                 ),
@@ -317,7 +352,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
                 Text(
                   workout.namaWorkout,
                   style: const TextStyle(
-                    color: PurplePalette.textPrimary,
+                    color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -327,8 +362,8 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
                 const SizedBox(height: 4),
                 Text(
                   workout.deskripsi,
-                  style: const TextStyle(
-                    color: PurplePalette.textSecondary,
+                  style: TextStyle(
+                    color: Colors.grey[100],
                     fontSize: 12,
                   ),
                   maxLines: 2,
@@ -344,7 +379,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: PurplePalette.orchid.withOpacity(0.1),
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: PurplePalette.orchid.withOpacity(0.3),
@@ -369,7 +404,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: statusColor.withOpacity(0.1),
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: statusColor.withOpacity(0.3),
@@ -401,31 +436,31 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
                 Row(
                   children: [
                     if (workout.jadwal != null) ...[
-                      const Icon(
+                      Icon(
                         FontAwesomeIcons.clock,
-                        color: PurplePalette.textSecondary,
+                        color: Colors.white,
                         size: 12,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         workout.jadwal!.formattedTime,
-                        style: const TextStyle(
-                          color: PurplePalette.textSecondary,
+                        style: TextStyle(
+                          color: Colors.white,
                           fontSize: 12,
                         ),
                       ),
                       const SizedBox(width: 12),
                     ],
-                    const Icon(
+                    Icon(
                       FontAwesomeIcons.listCheck,
-                      color: PurplePalette.textSecondary,
+                      color: Colors.white,
                       size: 12,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       workout.formattedExercises,
-                      style: const TextStyle(
-                        color: PurplePalette.textSecondary,
+                      style: TextStyle(
+                        color: Colors.white,
                         fontSize: 12,
                       ),
                     ),
@@ -437,16 +472,13 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: PurplePalette.wildberry.withOpacity(0.2),
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(
-                            color: PurplePalette.wildberry,
-                          ),
                         ),
                         child: Text(
                           workout.jadwal!.kategoriJadwal,
-                          style: const TextStyle(
-                            color: PurplePalette.lavender,
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                           ),
@@ -465,18 +497,20 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
 
   @override
   Widget build(BuildContext context) {
+    Provider.of<ThemeProvider>(context);
     final filteredWorkouts = _getFilteredWorkouts();
 
     return Scaffold(
-      backgroundColor: PurplePalette.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: PurplePalette.background,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
         centerTitle: true,
-        title: const Text(
+        automaticallyImplyLeading: false,
+        title: Text(
           "Workout Plan",
           style: TextStyle(
-            color: PurplePalette.textPrimary,
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 26,
             fontWeight: FontWeight.bold,
             fontFamily: 'Poppins',
@@ -485,9 +519,9 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
         actions: [
           IconButton(
             onPressed: _loadWorkouts,
-            icon: const Icon(
+            icon: Icon(
               Icons.refresh,
-              color: PurplePalette.lavender,
+              color: Theme.of(context).primaryColor,
             ),
           ),
         ],
@@ -495,9 +529,11 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
       body: SafeArea(
         child: Column(
           children: [
+            const SizedBox(height: 20),
+
             /// ================= FILTER BUTTONS =================
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: SizedBox(
                 height: 40,
                 child: ListView.builder(
@@ -518,28 +554,40 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
                           gradient: _selectedCategory == index
                               ? LinearGradient(
                                   colors: [
-                                    _categoryColors[index].withOpacity(0.8),
-                                    _categoryColors[index],
+                                    Theme.of(context)
+                                        .primaryColor
+                                        .withOpacity(0.8),
+                                    Theme.of(context).primaryColor,
                                   ],
                                 )
                               : null,
                           color: _selectedCategory == index
-                              ? null
-                              : PurplePalette.cardBackground,
+                              ? Theme.of(context).primaryColor
+                              : Theme.of(context).cardColor,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: _selectedCategory == index
-                                ? _categoryColors[index]
-                                : PurplePalette.mauve.withOpacity(0.5),
+                                ? Theme.of(context).primaryColor
+                                : Theme.of(context).primaryColor,
                           ),
+                          boxShadow: _selectedCategory == index
+                              ? [
+                                  BoxShadow(
+                                    color:
+                                        _categoryColors[index].withOpacity(0.3),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ]
+                              : null,
                         ),
                         child: Center(
                           child: Text(
                             _categories[index],
                             style: TextStyle(
                               color: _selectedCategory == index
-                                  ? PurplePalette.textPrimary
-                                  : PurplePalette.textSecondary,
+                                  ? Colors.white
+                                  : Theme.of(context).primaryColor,
                               fontWeight: FontWeight.w600,
                               fontSize: 14,
                             ),
@@ -564,8 +612,8 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
                         : _selectedCategory == 1
                             ? "With Equipment"
                             : "Without Equipment",
-                    style: const TextStyle(
-                      color: PurplePalette.textPrimary,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
@@ -577,16 +625,13 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: PurplePalette.wildberry.withOpacity(0.2),
+                        color: Theme.of(context).primaryColor,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: PurplePalette.wildberry,
-                        ),
                       ),
                       child: Text(
                         "${filteredWorkouts.length} items",
                         style: const TextStyle(
-                          color: PurplePalette.lavender,
+                          color: PurplePalette.textPrimary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -606,6 +651,7 @@ class _WorkoutPlanPageState extends State<WorkoutPlanPage> {
                       : filteredWorkouts.isEmpty
                           ? _buildEmptyState()
                           : SingleChildScrollView(
+                              physics: const AlwaysScrollableScrollPhysics(),
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
                                 vertical: 8,

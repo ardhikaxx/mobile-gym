@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_application_1/providers/theme_provider.dart';
+import 'package:flutter_application_1/themes.dart';
 import 'package:flutter_application_1/utils/session_manager.dart';
 import 'firebase_options.dart';
-import 'theme/theme_notifier.dart';
 
 import 'auth/login.dart';
 import 'auth/register.dart';
@@ -76,58 +78,43 @@ class _GymAppState extends State<GymApp> {
       );
     }
 
-    return ValueListenableBuilder<ThemeMode>(
-      valueListenable: themeNotifier,
-      builder: (context, mode, _) {
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'GYM GENZ',
-          themeMode: mode,
-          navigatorKey: _navigatorKey,
-          theme: ThemeData(
-            brightness: Brightness.light,
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: ungu, // ← dari theme_notifier.dart
-            ),
-            useMaterial3: true,
-            bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-              backgroundColor: Colors.white,
-            ),
-          ),
-          darkTheme: ThemeData(
-            brightness: Brightness.dark,
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: ungu,
-              brightness: Brightness.dark,
-            ),
-            useMaterial3: true,
-            bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-              backgroundColor: Color(0xFF1A1A1E),
-            ),
-          ),
-          initialRoute: _isLoggedIn ? '/login' : '/register',
-          routes: {
-            '/login': (_) => const LoginPage(),
-            '/register': (_) => const RegisterPage(),
-          },
-          onGenerateRoute: (settings) {
-            if (settings.name != '/login' && 
-                settings.name != '/register') {
-              _checkTokenBeforeNavigation().then((isValid) {
-                if (!isValid && _navigatorKey.currentState != null) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    _navigatorKey.currentState?.pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (context) => const LoginPage()),
-                      (route) => false,
-                    );
-                  });
-                }
-              });
-            }
-            return null;
-          },
-        );
-      },
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+      ],
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, _) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'GYM GENZ',
+            navigatorKey: _navigatorKey,
+            theme: ThemeClass.lightTheme,
+            darkTheme: ThemeClass.darkTheme,
+            themeMode: themeProvider.materialThemeMode,
+            initialRoute: _isLoggedIn ? '/login' : '/register',
+            routes: {
+              '/login': (_) => const LoginPage(),
+              '/register': (_) => const RegisterPage(),
+            },
+            onGenerateRoute: (settings) {
+              if (settings.name != '/login' && 
+                  settings.name != '/register') {
+                _checkTokenBeforeNavigation().then((isValid) {
+                  if (!isValid && _navigatorKey.currentState != null) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      _navigatorKey.currentState?.pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (context) => const LoginPage()),
+                        (route) => false,
+                      );
+                    });
+                  }
+                });
+              }
+              return null;
+            },
+          );
+        },
+      ),
     );
   }
 }

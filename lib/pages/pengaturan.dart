@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_application_1/providers/theme_provider.dart';
 import 'package:flutter_application_1/service/auth_services.dart';
 import 'package:flutter_application_1/utils/session_manager.dart';
 import 'edit_profil.dart';
-import 'ubah_password.dart'; 
+import 'ubah_password.dart';
 
 /// ================= PALETTE WARNA UNGU =================
 class PurplePalette {
@@ -49,7 +51,6 @@ class _PengaturanPageState extends State<PengaturanPage> {
     _loadUserData();
   }
 
-  // Method untuk memuat data user
   Future<void> _loadUserData() async {
     try {
       setState(() {
@@ -57,7 +58,6 @@ class _PengaturanPageState extends State<PengaturanPage> {
         _errorMessage = '';
       });
 
-      // Coba ambil dari cache/local storage terlebih dahulu
       final cachedUserData = await SessionManager.getUserData();
       if (cachedUserData != null) {
         setState(() {
@@ -66,7 +66,6 @@ class _PengaturanPageState extends State<PengaturanPage> {
         });
       }
 
-      // Kemudian fetch fresh data dari API
       final result = await AuthService.getProfile();
 
       if (result['success'] == true) {
@@ -75,7 +74,6 @@ class _PengaturanPageState extends State<PengaturanPage> {
           _isLoading = false;
         });
       } else {
-        // Jika gagal fetch dari API, tetap gunakan data cache
         if (_userData == null) {
           setState(() {
             _errorMessage = result['message'] ?? 'Gagal memuat data user';
@@ -120,22 +118,15 @@ class _PengaturanPageState extends State<PengaturanPage> {
     return 'user@example.com';
   }
 
-  // Method untuk handle logout dengan cara yang aman
   Future<void> _logout() async {
-    // Set state untuk mencegah multiple clicks
     if (_isLoggingOut) return;
-
     setState(() {
       _isLoggingOut = true;
     });
 
     try {
-      // Panggil logout service
       final result = await AuthService.logout();
-
-      // Hanya navigasi jika logout berhasil
       if (result['success'] == true && mounted) {
-        // Gunakan WidgetsBinding untuk menunda navigasi
         WidgetsBinding.instance.addPostFrameCallback((_) {
           Navigator.pushNamedAndRemoveUntil(
             context,
@@ -144,7 +135,6 @@ class _PengaturanPageState extends State<PengaturanPage> {
           );
         });
       } else if (mounted) {
-        // Tampilkan error jika logout gagal
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Logout gagal: ${result['message']}'),
@@ -156,7 +146,6 @@ class _PengaturanPageState extends State<PengaturanPage> {
         });
       }
     } catch (e) {
-      // Tangani error
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -301,17 +290,236 @@ class _PengaturanPageState extends State<PengaturanPage> {
     );
   }
 
+  // Method untuk menampilkan modal pemilihan tema
+  void _showThemeSelectionModal(BuildContext context) {
+    Provider.of<ThemeProvider>(context, listen: false);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        return Container(
+          margin: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+              bottomLeft: Radius.circular(12),
+              bottomRight: Radius.circular(12),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 20,
+                spreadRadius: 5,
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header Modal
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor.withOpacity(0.1),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.palette,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Text(
+                        "Pilih Tema Aplikasi",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Opsi Tema
+              Consumer<ThemeProvider>(
+                builder: (context, provider, _) {
+                  return Column(
+                    children: [
+                      // Sesuai Sistem
+                      _buildThemeOption(
+                        context: context,
+                        icon: Icons.auto_awesome,
+                        title: "Sesuai Sistem",
+                        subtitle: "Mengikuti pengaturan tema perangkat",
+                        isSelected: provider.themeMode == ThemeModeType.system,
+                        onTap: () {
+                          provider.setThemeMode(ThemeModeType.system);
+                          Navigator.pop(context);
+                        },
+                      ),
+
+                      const Divider(height: 1),
+
+                      // Mode Terang
+                      _buildThemeOption(
+                        context: context,
+                        icon: Icons.light_mode,
+                        title: "Mode Terang",
+                        subtitle: "Tampilan terang dengan warna cerah",
+                        isSelected: provider.themeMode == ThemeModeType.light,
+                        onTap: () {
+                          provider.setThemeMode(ThemeModeType.light);
+                          Navigator.pop(context);
+                        },
+                      ),
+
+                      const Divider(height: 1),
+
+                      // Mode Gelap
+                      _buildThemeOption(
+                        context: context,
+                        icon: Icons.dark_mode,
+                        title: "Mode Gelap",
+                        subtitle: "Tampilan gelap untuk kenyamanan mata",
+                        isSelected: provider.themeMode == ThemeModeType.dark,
+                        onTap: () {
+                          provider.setThemeMode(ThemeModeType.dark);
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+
+              // Spacer dan Tombol Batal
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Theme.of(context).colorScheme.onSurface,
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: const Text("Batal"),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildThemeOption({
+    required BuildContext context,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      leading: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Theme.of(context).primaryColor.withOpacity(0.2)
+              : Theme.of(context).colorScheme.surface,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: isSelected
+                ? Theme.of(context).primaryColor
+                : Theme.of(context).dividerColor,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Icon(
+          icon,
+          color: isSelected
+              ? Theme.of(context).primaryColor
+              : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+          size: 24,
+        ),
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: Theme.of(context).colorScheme.onSurface,
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(
+          fontSize: 12,
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+        ),
+      ),
+      trailing: isSelected
+          ? Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.check,
+                color: Colors.white,
+                size: 16,
+              ),
+            )
+          : null,
+      onTap: onTap,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    Provider.of<ThemeProvider>(context);
+
     return Scaffold(
-      backgroundColor: PurplePalette.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: PurplePalette.background,
+        automaticallyImplyLeading: false,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
         title: const Text(
           "Profile Settings",
           style: TextStyle(
-            color: PurplePalette.textPrimary,
             fontSize: 26,
             fontWeight: FontWeight.bold,
             fontFamily: 'Poppins',
@@ -331,35 +539,38 @@ class _PengaturanPageState extends State<PengaturanPage> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: PurplePalette.cardBackground,
+                color: Theme.of(context).primaryColor,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: PurplePalette.mauve.withOpacity(0.5),
-                ),
               ),
               child: const Icon(
                 Icons.more_vert,
-                color: PurplePalette.textPrimary,
+                color: Colors.white,
               ),
             ),
             itemBuilder: (context) => [
-              const PopupMenuItem<String>(
+              PopupMenuItem<String>(
                 value: 'refresh',
                 child: Row(
                   children: [
-                    Icon(FontAwesomeIcons.sync, size: 16),
-                    SizedBox(width: 8),
-                    Text('Refresh Data'),
+                    Icon(FontAwesomeIcons.sync,
+                        size: 16, color: Theme.of(context).primaryColor),
+                    const SizedBox(width: 8),
+                    Text('Refresh Data',
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface)),
                   ],
                 ),
               ),
-              const PopupMenuItem<String>(
+              PopupMenuItem<String>(
                 value: 'about',
                 child: Row(
                   children: [
-                    Icon(FontAwesomeIcons.infoCircle, size: 16),
-                    SizedBox(width: 8),
-                    Text('About App'),
+                    Icon(FontAwesomeIcons.infoCircle,
+                        size: 16, color: Theme.of(context).primaryColor),
+                    const SizedBox(width: 8),
+                    Text('About App',
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface)),
                   ],
                 ),
               ),
@@ -375,19 +586,11 @@ class _PengaturanPageState extends State<PengaturanPage> {
               margin: const EdgeInsets.all(16),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: PurplePalette.cardBackground,
+                color: Theme.of(context).primaryColor,
                 borderRadius: BorderRadius.circular(20),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    PurplePalette.eggplant.withOpacity(0.8),
-                    PurplePalette.violet.withOpacity(0.8),
-                  ],
-                ),
                 boxShadow: [
                   BoxShadow(
-                    color: PurplePalette.violet.withOpacity(0.3),
+                    color: Theme.of(context).primaryColor.withOpacity(0.3),
                     blurRadius: 15,
                     spreadRadius: 2,
                     offset: const Offset(0, 4),
@@ -403,13 +606,13 @@ class _PengaturanPageState extends State<PengaturanPage> {
                           ? Container(
                               width: 80,
                               height: 80,
-                              decoration: const BoxDecoration(
+                              decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: PurplePalette.cardBackground,
+                                color: Theme.of(context).cardColor,
                               ),
-                              child: const Center(
+                              child: Center(
                                 child: CircularProgressIndicator(
-                                  color: PurplePalette.accent,
+                                  color: Theme.of(context).primaryColor,
                                   strokeWidth: 2,
                                 ),
                               ),
@@ -420,13 +623,15 @@ class _PengaturanPageState extends State<PengaturanPage> {
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color: PurplePalette.lavender,
+                                  color: Theme.of(context).primaryColor,
                                   width: 3,
                                 ),
-                                gradient: const LinearGradient(
+                                gradient: LinearGradient(
                                   colors: [
-                                    PurplePalette.orchid,
-                                    PurplePalette.lavender,
+                                    Theme.of(context).primaryColor,
+                                    Theme.of(context)
+                                        .primaryColor
+                                        .withOpacity(0.7),
                                   ],
                                 ),
                               ),
@@ -454,18 +659,19 @@ class _PengaturanPageState extends State<PengaturanPage> {
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color:
-                                      PurplePalette.lavender.withOpacity(0.5),
+                                  color: Theme.of(context)
+                                      .primaryColor
+                                      .withOpacity(0.5),
                                   blurRadius: 8,
                                   spreadRadius: 1,
                                   offset: const Offset(0, 2),
                                 ),
                               ],
                             ),
-                            child: const Center(
+                            child: Center(
                               child: Icon(
                                 FontAwesomeIcons.pencil,
-                                color: PurplePalette.accent,
+                                color: Theme.of(context).primaryColor,
                                 size: 14,
                               ),
                             ),
@@ -498,25 +704,22 @@ class _PengaturanPageState extends State<PengaturanPage> {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: PurplePalette.lavender.withOpacity(0.2),
+                            color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: PurplePalette.lavender,
-                            ),
                           ),
                           child: Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 FontAwesomeIcons.envelope,
-                                color: Colors.white,
+                                color: Theme.of(context).primaryColor,
                                 size: 12,
                               ),
                               const SizedBox(width: 6),
                               Expanded(
                                 child: Text(
                                   _userEmail,
-                                  style: const TextStyle(
-                                    color: Colors.white,
+                                  style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
                                     fontSize: 14,
                                   ),
                                   maxLines: 1,
@@ -526,90 +729,6 @@ class _PengaturanPageState extends State<PengaturanPage> {
                             ],
                           ),
                         ),
-
-                        // Additional User Info
-                        if (_userData != null && !_isLoading)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Row(
-                              children: [
-                                // BMI
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color:
-                                        PurplePalette.orchid.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: PurplePalette.orchid,
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      const Icon(
-                                        FontAwesomeIcons.chartLine,
-                                        size: 12,
-                                        color: Colors.white,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'BMI: ${_userData!['bmi']?.toStringAsFixed(1) ?? widget.bmi.toStringAsFixed(1)}',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-
-                                const SizedBox(width: 8),
-
-                                // Gender
-                                if (_userData!['jenis_kelamin'] != null)
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color:
-                                          PurplePalette.lilac.withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: PurplePalette.lilac,
-                                        width: 1,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          _userData!['jenis_kelamin'] == 'L'
-                                              ? FontAwesomeIcons.mars
-                                              : FontAwesomeIcons.venus,
-                                          size: 12,
-                                          color: Colors.white,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          _userData!['jenis_kelamin'] == 'L'
-                                              ? 'Laki-laki'
-                                              : 'Perempuan',
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
                       ],
                     ),
                   ),
@@ -667,13 +786,13 @@ class _PengaturanPageState extends State<PengaturanPage> {
                 child: Column(
                   children: [
                     _buildSettingsSection(
-                      title: "ACCOUNT SETTINGS",
+                      title: "PENGATURAN AKUN",
                       items: [
                         {
                           "icon": FontAwesomeIcons.userEdit,
-                          "title": "Edit Profile",
-                          "subtitle": "Update your personal information",
-                          "color": PurplePalette.orchid,
+                          "title": "Edit Profil",
+                          "subtitle": "Perbarui informasi pribadi Anda",
+                          "color": Theme.of(context).primaryColor,
                           "onTap": () {
                             Navigator.push(
                               context,
@@ -684,12 +803,34 @@ class _PengaturanPageState extends State<PengaturanPage> {
                           },
                         },
                         {
-                          "icon": FontAwesomeIcons.shieldAlt,
-                          "title": "Security",
-                          "subtitle": "Security and password settings",
-                          "color": PurplePalette.orchid,
+                          "icon": FontAwesomeIcons.palette,
+                          "title": "Tema Aplikasi",
+                          "subtitle":
+                              "Sesuaikan tampilan aplikasi sesuai preferensi Anda",
+                          "color": Theme.of(context).primaryColor,
+                          "onTap": () => _showThemeSelectionModal(context),
+                        },
+                        {
+                          "icon": FontAwesomeIcons.commentDots,
+                          "title": "Feedback Pengguna",
+                          "subtitle":
+                              "Berikan saran atau kritik untuk aplikasi",
+                          "color": Theme.of(context).primaryColor,
                           "onTap": () {
-                            // Navigasi ke halaman ubah password
+                            // TODO: arahkan ke halaman/form feedback
+                            // contoh:
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(builder: (context) => FeedbackPage()),
+                            // );
+                          },
+                        },
+                        {
+                          "icon": FontAwesomeIcons.shieldAlt,
+                          "title": "Keamanan",
+                          "subtitle": "Pengaturan keamanan dan sandi",
+                          "color": Theme.of(context).primaryColor,
+                          "onTap": () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -710,27 +851,23 @@ class _PengaturanPageState extends State<PengaturanPage> {
                               height: 56,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(16),
-                                color: PurplePalette.cardBackground,
+                                color: Theme.of(context).cardColor,
                               ),
-                              child: const Center(
+                              child: Center(
                                 child: CircularProgressIndicator(
-                                  color: PurplePalette.accent,
+                                  color: Theme.of(context).primaryColor,
                                 ),
                               ),
                             )
                           : Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(16),
-                                gradient: LinearGradient(
-                                  colors: [
-                                    PurplePalette.eggplant.withOpacity(0.8),
-                                    PurplePalette.violet.withOpacity(0.8),
-                                  ],
-                                ),
+                                color: Theme.of(context).primaryColor,
                                 boxShadow: [
                                   BoxShadow(
-                                    color:
-                                        PurplePalette.violet.withOpacity(0.3),
+                                    color: Theme.of(context)
+                                        .primaryColor
+                                        .withOpacity(0.3),
                                     blurRadius: 15,
                                     spreadRadius: 2,
                                     offset: const Offset(0, 4),
@@ -743,7 +880,7 @@ class _PengaturanPageState extends State<PengaturanPage> {
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.transparent,
-                                  foregroundColor: PurplePalette.textPrimary,
+                                  foregroundColor: Colors.white,
                                   shadowColor: Colors.transparent,
                                   minimumSize: const Size(double.infinity, 56),
                                   shape: RoundedRectangleBorder(
@@ -772,19 +909,22 @@ class _PengaturanPageState extends State<PengaturanPage> {
                     ),
 
                     const SizedBox(height: 16),
-                    const Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
                           FontAwesomeIcons.codeBranch,
-                          color: PurplePalette.lavender,
+                          color: Theme.of(context).primaryColor,
                           size: 12,
                         ),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         Text(
                           "App Version 1.0.0",
                           style: TextStyle(
-                            color: PurplePalette.textSecondary,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(0.6),
                             fontSize: 12,
                           ),
                         ),
@@ -813,8 +953,8 @@ class _PengaturanPageState extends State<PengaturanPage> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             title,
-            style: const TextStyle(
-              color: PurplePalette.textSecondary,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
               fontSize: 12,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.5,
@@ -825,14 +965,14 @@ class _PengaturanPageState extends State<PengaturanPage> {
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
-            color: PurplePalette.cardBackground,
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: PurplePalette.mauve.withOpacity(0.3),
+              color: Theme.of(context).dividerColor,
             ),
             boxShadow: [
               BoxShadow(
-                color: PurplePalette.violet.withOpacity(0.1),
+                color: Theme.of(context).primaryColor.withOpacity(0.1),
                 blurRadius: 10,
                 spreadRadius: 1,
                 offset: const Offset(0, 4),
@@ -848,7 +988,7 @@ class _PengaturanPageState extends State<PengaturanPage> {
                   children: [
                     if (index > 0)
                       Divider(
-                        color: PurplePalette.mauve.withOpacity(0.3),
+                        color: Theme.of(context).dividerColor,
                         height: 1,
                         indent: 16,
                         endIndent: 16,
@@ -884,16 +1024,19 @@ class _PengaturanPageState extends State<PengaturanPage> {
                       ),
                       title: Text(
                         item["title"] as String,
-                        style: const TextStyle(
-                          color: PurplePalette.textPrimary,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       subtitle: Text(
                         item["subtitle"] as String,
-                        style: const TextStyle(
-                          color: PurplePalette.textSecondary,
+                        style: TextStyle(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.6),
                           fontSize: 12,
                         ),
                       ),
@@ -901,16 +1044,19 @@ class _PengaturanPageState extends State<PengaturanPage> {
                         width: 32,
                         height: 32,
                         decoration: BoxDecoration(
-                          color: PurplePalette.cardBackground,
+                          color: Theme.of(context).cardColor,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: PurplePalette.mauve.withOpacity(0.5),
+                            color: Theme.of(context).dividerColor,
                           ),
                         ),
-                        child: const Center(
+                        child: Center(
                           child: Icon(
                             FontAwesomeIcons.chevronRight,
-                            color: PurplePalette.textSecondary,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(0.6),
                             size: 14,
                           ),
                         ),
@@ -931,11 +1077,11 @@ class _PengaturanPageState extends State<PengaturanPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: PurplePalette.cardBackground,
+        backgroundColor: Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: BorderSide(
-            color: PurplePalette.lavender.withOpacity(0.3),
+            color: Theme.of(context).primaryColor.withOpacity(0.3),
           ),
         ),
         title: Row(
@@ -944,61 +1090,61 @@ class _PengaturanPageState extends State<PengaturanPage> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: PurplePalette.lavender.withOpacity(0.2),
+                color: Theme.of(context).primaryColor.withOpacity(0.2),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: PurplePalette.lavender,
+                  color: Theme.of(context).primaryColor,
                 ),
               ),
-              child: const Center(
+              child: Center(
                 child: Icon(
                   FontAwesomeIcons.infoCircle,
-                  color: PurplePalette.lavender,
+                  color: Theme.of(context).primaryColor,
                   size: 20,
                 ),
               ),
             ),
             const SizedBox(width: 12),
-            const Text(
+            Text(
               "About App",
               style: TextStyle(
-                color: PurplePalette.textPrimary,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ],
         ),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               "GYM GENZ",
               style: TextStyle(
-                color: PurplePalette.textPrimary,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               "Version: 1.0.0",
               style: TextStyle(
-                color: PurplePalette.textSecondary,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
               ),
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
               "Developed by: Team GYM GENZ",
               style: TextStyle(
-                color: PurplePalette.textSecondary,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               "A modern fitness app for the new generation of gym enthusiasts.",
               style: TextStyle(
-                color: PurplePalette.textSecondary,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                 fontSize: 12,
               ),
             ),
@@ -1011,8 +1157,8 @@ class _PengaturanPageState extends State<PengaturanPage> {
               borderRadius: BorderRadius.circular(12),
               gradient: LinearGradient(
                 colors: [
-                  PurplePalette.eggplant.withOpacity(0.8),
-                  PurplePalette.violet.withOpacity(0.8),
+                  Theme.of(context).primaryColor.withOpacity(0.8),
+                  Theme.of(context).primaryColor.withOpacity(0.4),
                 ],
               ),
             ),
@@ -1020,7 +1166,7 @@ class _PengaturanPageState extends State<PengaturanPage> {
               onPressed: () => Navigator.pop(context),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.transparent,
-                foregroundColor: PurplePalette.textPrimary,
+                foregroundColor: Colors.white,
                 shadowColor: Colors.transparent,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_application_1/service/auth_services.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_application_1/providers/theme_provider.dart';
 
 /// ================= PALETTE WARNA UNGU =================
 class PurplePalette {
@@ -58,7 +60,6 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-
     setState(() {
       _isLoading = true;
       _errorMessage = '';
@@ -77,14 +78,10 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
           _successMessage = result['message'];
           _isLoading = false;
         });
-
-        // Reset form
         _formKey.currentState!.reset();
         _currentPasswordController.clear();
         _newPasswordController.clear();
         _confirmPasswordController.clear();
-
-        // Auto hide success message after 3 seconds
         Future.delayed(const Duration(seconds: 3), () {
           if (mounted) {
             setState(() {
@@ -118,10 +115,12 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    Provider.of<ThemeProvider>(context);
+
     return Scaffold(
-      backgroundColor: PurplePalette.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: PurplePalette.background,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
         leading: IconButton(
           onPressed: () {
@@ -131,23 +130,20 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: PurplePalette.cardBackground,
+              color: Theme.of(context).primaryColor,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: PurplePalette.mauve.withOpacity(0.5),
-              ),
             ),
             child: const Icon(
               Icons.arrow_back_ios_new_rounded,
-              color: PurplePalette.textPrimary,
+              color: Colors.white,
               size: 20,
             ),
           ),
         ),
-        title: const Text(
+        title: Text(
           "Ubah Password",
           style: TextStyle(
-            color: PurplePalette.textPrimary,
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 26,
             fontWeight: FontWeight.bold,
             fontFamily: 'Poppins',
@@ -165,11 +161,8 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: PurplePalette.cardBackground,
+                  color: Theme.of(context).primaryColor,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: PurplePalette.mauve.withOpacity(0.3),
-                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -177,19 +170,16 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
                     Row(
                       children: [
                         Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: PurplePalette.lavender.withOpacity(0.2),
+                          width: 34,
+                          height: 34,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
                             shape: BoxShape.circle,
-                            border: Border.all(
-                              color: PurplePalette.lavender,
-                            ),
                           ),
-                          child: const Center(
+                          child: Center(
                             child: Icon(
                               FontAwesomeIcons.shieldAlt,
-                              color: PurplePalette.lavender,
+                              color: Theme.of(context).primaryColor,
                               size: 16,
                             ),
                           ),
@@ -198,7 +188,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
                         const Text(
                           "Tips Keamanan",
                           style: TextStyle(
-                            color: PurplePalette.textPrimary,
+                            color: Colors.white,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -207,15 +197,19 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
                     ),
                     const SizedBox(height: 12),
                     _buildSecurityTip(
+                      context,
                       "Gunakan password yang unik dan tidak digunakan di tempat lain",
                     ),
                     _buildSecurityTip(
+                      context,
                       "Hindari menggunakan informasi pribadi seperti tanggal lahir",
                     ),
                     _buildSecurityTip(
+                      context,
                       "Ganti password secara berkala untuk keamanan maksimal",
                     ),
                     _buildSecurityTip(
+                      context,
                       "Jangan bagikan password Anda kepada siapapun",
                     ),
                   ],
@@ -227,15 +221,15 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
                   margin: const EdgeInsets.only(bottom: 16),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: PurplePalette.success.withOpacity(0.1),
+                    color: Colors.green.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: PurplePalette.success),
+                    border: Border.all(color: Colors.green),
                   ),
                   child: Row(
                     children: [
                       const Icon(
                         FontAwesomeIcons.checkCircle,
-                        color: PurplePalette.success,
+                        color: Colors.green,
                         size: 16,
                       ),
                       const SizedBox(width: 8),
@@ -243,7 +237,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
                         child: Text(
                           _successMessage,
                           style: const TextStyle(
-                            color: PurplePalette.success,
+                            color: Colors.green,
                           ),
                         ),
                       ),
@@ -255,7 +249,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
                         },
                         icon: const Icon(
                           FontAwesomeIcons.times,
-                          color: PurplePalette.success,
+                          color: Colors.green,
                           size: 16,
                         ),
                       ),
@@ -311,6 +305,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
                   children: [
                     // Password Saat Ini
                     _buildPasswordField(
+                      context: context,
                       controller: _currentPasswordController,
                       label: "Password Saat Ini",
                       hint: "Masukkan password saat ini",
@@ -327,6 +322,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
 
                     // Password Baru
                     _buildPasswordField(
+                      context: context,
                       controller: _newPasswordController,
                       label: "Password Baru",
                       hint: "Masukkan password baru",
@@ -341,6 +337,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
                     const SizedBox(height: 8),
                     // Konfirmasi Password Baru
                     _buildPasswordField(
+                      context: context,
                       controller: _confirmPasswordController,
                       label: "Konfirmasi Password Baru",
                       hint: "Masukkan ulang password baru",
@@ -368,7 +365,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: PurplePalette.violet.withOpacity(0.3),
+                            color: Colors.black.withOpacity(0.3),
                             blurRadius: 15,
                             spreadRadius: 2,
                             offset: const Offset(0, 4),
@@ -379,7 +376,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
                         onPressed: _isLoading ? null : _changePassword,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
-                          foregroundColor: PurplePalette.textPrimary,
+                          foregroundColor: Colors.white,
                           shadowColor: Colors.transparent,
                           minimumSize: const Size(double.infinity, 56),
                           shape: RoundedRectangleBorder(
@@ -422,7 +419,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: PurplePalette.mauve.withOpacity(0.5),
+                          color: Theme.of(context).primaryColor, width: 1.8
                         ),
                       ),
                       child: ElevatedButton(
@@ -433,24 +430,27 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
                               },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
-                          foregroundColor: PurplePalette.textSecondary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.onSurface,
                           shadowColor: Colors.transparent,
                           minimumSize: const Size(double.infinity, 56),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
                               FontAwesomeIcons.times,
+                              color: Theme.of(context).primaryColor,
                               size: 20,
                             ),
-                            SizedBox(width: 12),
+                            const SizedBox(width: 12),
                             Text(
                               "Batal",
                               style: TextStyle(
+                                color: Theme.of(context).primaryColor,
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -471,6 +471,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
   }
 
   Widget _buildPasswordField({
+    required BuildContext context,
     required TextEditingController controller,
     required String label,
     required String hint,
@@ -484,8 +485,8 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: PurplePalette.textPrimary,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
@@ -495,24 +496,24 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
           controller: controller,
           obscureText: obscureText,
           validator: validator,
-          style: const TextStyle(color: PurplePalette.textPrimary),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
           decoration: InputDecoration(
             filled: true,
-            fillColor: PurplePalette.cardBackground,
+            fillColor: Theme.of(context).cardColor,
             hintText: hint,
             hintStyle: TextStyle(
-              color: PurplePalette.textSecondary.withOpacity(0.7),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
             ),
             prefixIcon: Icon(
               icon,
-              color: PurplePalette.textSecondary,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
               size: 20,
             ),
             suffixIcon: IconButton(
               onPressed: onToggleObscure,
               icon: Icon(
                 obscureText ? FontAwesomeIcons.eyeSlash : FontAwesomeIcons.eye,
-                color: PurplePalette.textSecondary,
+                color: Theme.of(context).primaryColor,
                 size: 20,
               ),
             ),
@@ -522,23 +523,30 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: PurplePalette.accent,
+              borderSide: BorderSide(
+                color: Theme.of(context).primaryColor,
                 width: 2,
               ),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: Colors.red,
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.error,
                 width: 1,
               ),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: Colors.red,
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.error,
                 width: 2,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(
+                color: Theme.of(context).dividerColor,
+                width: 1,
               ),
             ),
           ),
@@ -547,7 +555,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
     );
   }
 
-  Widget _buildSecurityTip(String text) {
+  Widget _buildSecurityTip(BuildContext context, String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -555,7 +563,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
         children: [
           const Icon(
             FontAwesomeIcons.circle,
-            color: PurplePalette.lavender,
+            color: Colors.white,
             size: 6,
           ),
           const SizedBox(width: 8),
@@ -563,7 +571,7 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
             child: Text(
               text,
               style: const TextStyle(
-                color: PurplePalette.textSecondary,
+                color: Colors.white,
                 fontSize: 12,
               ),
             ),

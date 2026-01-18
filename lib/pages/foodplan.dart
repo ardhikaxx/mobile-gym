@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter_application_1/service/foodplan_services.dart';
+import 'package:flutter_application_1/providers/theme_provider.dart';
 
 /// ================= PALETTE WARNA UNGU =================
 class PurplePalette {
@@ -112,20 +114,6 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
     }
   }
 
-  Color _getCategoryColor(String category) {
-    switch (category.toLowerCase()) {
-      case 'pagi':
-        return PurplePalette.carbs;
-      case 'siang':
-        return PurplePalette.orchid;
-      case 'sore':
-        return PurplePalette.lavender;
-      case 'malam':
-        return PurplePalette.info;
-      default:
-        return PurplePalette.accent;
-    }
-  }
 
   String _getCategoryTitle(String category) {
     switch (category.toLowerCase()) {
@@ -143,18 +131,18 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
   }
 
   Widget _buildLoadingState() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(
-            color: PurplePalette.orchid,
+            color: Theme.of(context).primaryColor,
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Text(
             'Memuat data makanan...',
             style: TextStyle(
-              color: PurplePalette.textSecondary,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
               fontSize: 16,
             ),
           ),
@@ -176,8 +164,8 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
           const SizedBox(height: 20),
           Text(
             _errorMessage,
-            style: const TextStyle(
-              color: PurplePalette.textPrimary,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 16,
               fontWeight: FontWeight.w500,
             ),
@@ -187,7 +175,7 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
           ElevatedButton(
             onPressed: _loadFoodPlan,
             style: ElevatedButton.styleFrom(
-              backgroundColor: PurplePalette.accent,
+              backgroundColor: Theme.of(context).primaryColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -210,7 +198,7 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: color.withOpacity(0.3),
@@ -222,15 +210,15 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
         children: [
           Text(
             label,
-            style: const TextStyle(
-              color: PurplePalette.textSecondary,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 10,
             ),
           ),
           Text(
             value,
             style: TextStyle(
-              color: color,
+              color: Theme.of(context).primaryColor,
               fontSize: 12,
               fontWeight: FontWeight.bold,
             ),
@@ -245,23 +233,15 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: PurplePalette.cardBackground,
+        color: Theme.of(context).primaryColor,
         borderRadius: BorderRadius.circular(16),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            PurplePalette.eggplant.withOpacity(0.3),
-            PurplePalette.cardBackground,
-          ],
-        ),
         border: Border.all(
           color: PurplePalette.mauve.withOpacity(0.3),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: PurplePalette.violet.withOpacity(0.1),
+            color: Colors.black.withOpacity(0.2),
             blurRadius: 10,
             spreadRadius: 1,
             offset: const Offset(0, 4),
@@ -275,14 +255,7 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  PurplePalette.orchid.withOpacity(0.3),
-                  PurplePalette.lavender.withOpacity(0.1),
-                ],
-              ),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: PurplePalette.orchid.withOpacity(0.5),
@@ -313,7 +286,7 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
                           Text(
                             food.namaMakanan,
                             style: const TextStyle(
-                              color: PurplePalette.textPrimary,
+                              color: Colors.white,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
@@ -325,16 +298,13 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: PurplePalette.wildberry.withOpacity(0.2),
+                              color: PurplePalette.textPrimary,
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: PurplePalette.wildberry,
-                              ),
                             ),
                             child: Text(
                               food.formattedCalories,
-                              style: const TextStyle(
-                                color: PurplePalette.lavender,
+                              style: TextStyle(
+                                color: Theme.of(context).primaryColor,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
                               ),
@@ -349,7 +319,7 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
                       },
                       icon: const Icon(
                         FontAwesomeIcons.chevronRight,
-                        color: PurplePalette.textSecondary,
+                        color: Colors.white,
                         size: 20,
                       ),
                     ),
@@ -358,8 +328,8 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
                 const SizedBox(height: 8),
                 Text(
                   food.deskripsi,
-                  style: const TextStyle(
-                    color: PurplePalette.textSecondary,
+                  style: TextStyle(
+                    color: Colors.grey[200],
                     fontSize: 14,
                   ),
                   maxLines: 2,
@@ -401,28 +371,24 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
     required Color color,
   }) {
     return Container(
-      padding: const EdgeInsets.all(6),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withOpacity(0.3),
-          width: 1,
-        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             icon,
-            color: color,
+            color: Theme.of(context).primaryColor,
             size: 14,
           ),
           const SizedBox(width: 6),
           Text(
             value,
-            style: const TextStyle(
-              color: PurplePalette.textPrimary,
+            style: TextStyle(
+              color: Theme.of(context).primaryColor,
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
@@ -440,7 +406,7 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: PurplePalette.cardBackground.withOpacity(0.3),
+          color: Theme.of(context).primaryColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: PurplePalette.mauve.withOpacity(0.2),
@@ -449,8 +415,8 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
         child: Center(
           child: Text(
             'Tidak ada makanan untuk $category',
-            style: const TextStyle(
-              color: PurplePalette.textSecondary,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -469,17 +435,13 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: _getCategoryColor(category).withOpacity(0.2),
+                  color: Theme.of(context).primaryColor,
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: _getCategoryColor(category).withOpacity(0.5),
-                    width: 2,
-                  ),
                 ),
                 child: Center(
                   child: Icon(
                     _getCategoryIcon(category),
-                    color: _getCategoryColor(category),
+                    color: PurplePalette.textPrimary,
                     size: 16,
                   ),
                 ),
@@ -487,8 +449,8 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
               const SizedBox(width: 12),
               Text(
                 _getCategoryTitle(category),
-                style: const TextStyle(
-                  color: PurplePalette.textPrimary,
+                style: TextStyle(
+                  color: Theme.of(context).primaryColor,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -500,16 +462,16 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: PurplePalette.wildberry.withOpacity(0.2),
+                  color: Theme.of(context).primaryColor,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: PurplePalette.wildberry,
+                    color: PurplePalette.textPrimary,
                   ),
                 ),
                 child: Text(
                   "${foods.length} items",
                   style: const TextStyle(
-                    color: PurplePalette.lavender,
+                    color: PurplePalette.textPrimary,
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                   ),
@@ -526,15 +488,18 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
 
   @override
   Widget build(BuildContext context) {
+    Provider.of<ThemeProvider>(context);
+
     return Scaffold(
-      backgroundColor: PurplePalette.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: PurplePalette.background,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
-        title: const Text(
+        automaticallyImplyLeading: false,
+        title: Text(
           "FoodPlan Gym",
           style: TextStyle(
-            color: PurplePalette.textPrimary,
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 26,
             fontWeight: FontWeight.bold,
             fontFamily: 'Poppins',
@@ -544,9 +509,9 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
         actions: [
           IconButton(
             onPressed: _loadFoodPlan,
-            icon: const Icon(
+            icon: Icon(
               Icons.refresh,
-              color: PurplePalette.lavender,
+              color: Theme.of(context).primaryColor,
             ),
           ),
         ],
@@ -554,6 +519,7 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
       body: SafeArea(
         child: Column(
           children: [
+            const SizedBox(height: 20),
             if (_isLoading)
               Expanded(child: _buildLoadingState())
             else if (_errorMessage.isNotEmpty)
@@ -561,22 +527,14 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
             else ...[
               /// ================= HEADER CARD =================
               Container(
-                margin: const EdgeInsets.all(16),
+                margin: const EdgeInsets.symmetric(horizontal: 16),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: PurplePalette.cardBackground,
+                  color: Theme.of(context).primaryColor,
                   borderRadius: BorderRadius.circular(16),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      PurplePalette.eggplant.withOpacity(0.8),
-                      PurplePalette.violet.withOpacity(0.8),
-                    ],
-                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: PurplePalette.violet.withOpacity(0.3),
+                      color: Colors.black.withOpacity(0.3),
                       blurRadius: 15,
                       spreadRadius: 2,
                       offset: const Offset(0, 4),
@@ -592,7 +550,7 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
                         const Text(
                           "Daily Nutrition",
                           style: TextStyle(
-                            color: PurplePalette.textPrimary,
+                            color: Colors.white,
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
@@ -631,17 +589,17 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
                       width: 50,
                       height: 50,
                       decoration: BoxDecoration(
-                        color: PurplePalette.lavender.withOpacity(0.2),
+                        color: PurplePalette.textPrimary,
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: PurplePalette.lavender,
                           width: 2,
                         ),
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Icon(
                           FontAwesomeIcons.fire,
-                          color: PurplePalette.lavender,
+                          color: Theme.of(context).primaryColor,
                           size: 24,
                         ),
                       ),
@@ -650,30 +608,32 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
                 ),
               ),
 
+              const SizedBox(height: 16),
+
               /// ================= DATE =================
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 16),
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: PurplePalette.cardBackground,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: PurplePalette.mauve.withOpacity(0.5),
+                    color: Theme.of(context).primaryColor,
                   ),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
+                    Icon(
                       FontAwesomeIcons.calendar,
-                      color: PurplePalette.lilac,
+                      color: Theme.of(context).primaryColor,
                       size: 16,
                     ),
                     const SizedBox(width: 12),
                     Text(
                       _currentDate,
-                      style: const TextStyle(
-                        color: PurplePalette.lilac,
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
@@ -699,33 +659,27 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
                             right: index < categoryNames.length - 1 ? 8 : 0,
                           ),
                           decoration: BoxDecoration(
-                            gradient: _selectedCategory == index
-                                ? LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      categoryColors[index].withOpacity(0.8),
-                                      categoryColors[index],
-                                    ],
-                                  )
-                                : null,
                             color: _selectedCategory == index
-                                ? null
-                                : PurplePalette.cardBackground,
+                                ? Theme.of(context).primaryColor
+                                : Theme.of(context).cardColor,
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: _selectedCategory == index
-                                  ? categoryColors[index]
-                                  : PurplePalette.mauve.withOpacity(0.5),
-                            ),
+                            boxShadow: _selectedCategory == index
+                                ? [
+                                    BoxShadow(
+                                      color: categoryColors[index].withOpacity(0.3),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ]
+                                : null,
                           ),
                           child: Center(
                             child: Text(
                               categoryNames[index],
                               style: TextStyle(
                                 color: _selectedCategory == index
-                                    ? PurplePalette.textPrimary
-                                    : PurplePalette.textSecondary,
+                                    ? Colors.white
+                                    : Theme.of(context).primaryColor,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
                               ),
@@ -743,6 +697,7 @@ class _FoodPlanPageState extends State<FoodPlanPage> {
               /// ================= MEAL SECTIONS =================
               Expanded(
                 child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.only(bottom: 16),
                   child: Column(
                     children: [

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
+import '../themes.dart';
 
 class ChatbotScreens extends StatefulWidget {
   const ChatbotScreens({Key? key}) : super(key: key);
@@ -25,18 +28,6 @@ class _ChatbotScreensState extends State<ChatbotScreens> {
   final List<Message> _messages = [];
   final ScrollController _scrollController = ScrollController();
   bool _isLoading = false;
-
-  // Purple palette untuk konsistensi dengan home.dart
-  static const Color background = Color(0xFF08030C);
-  static const Color cardBackground = Color(0xFF2C123A);
-  static const Color textPrimary = Colors.white;
-  static const Color textSecondary = Color(0xFFC7B8D6);
-  static const Color accent = Color(0xFFA32CC4);
-  static const Color lavender = Color(0xFFE39FF6);
-  static const Color amethyst = Color(0xFF9966CC);
-  static const Color wildberry = Color(0xFF8B2991);
-  static const Color iris = Color(0xFF9866C5);
-  static const Color orchid = Color(0xFFAF69EE);
 
   // Responses untuk chatbot (Gen Z style)
   final List<Map<String, dynamic>> _botResponses = [
@@ -114,6 +105,42 @@ class _ChatbotScreensState extends State<ChatbotScreens> {
     },
   ];
 
+  // Helper methods untuk mendapatkan warna berdasarkan tema
+  Color _getBackgroundColor(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    return themeProvider.currentTheme.scaffoldBackgroundColor;
+  }
+
+  Color _getCardBackgroundColor(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    return themeProvider.currentTheme.cardTheme.color ??
+        (themeProvider.themeMode == ThemeModeType.dark
+            ? ThemeClass.cardBackgroundDark
+            : ThemeClass.cardBackgroundLight);
+  }
+
+  Color _getPrimaryColor(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    return themeProvider.currentTheme.primaryColor;
+  }
+
+  Color _getTextPrimaryColor(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    return themeProvider.currentTheme.textTheme.bodyLarge?.color ??
+        Colors.black;
+  }
+
+  Color _getTextSecondaryColor(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    return themeProvider.currentTheme.textTheme.bodyMedium?.color ??
+        Colors.grey;
+  }
+
+  Color _getDividerColor(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    return themeProvider.currentTheme.dividerTheme.color ?? Colors.grey[300]!;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -139,27 +166,28 @@ class _ChatbotScreensState extends State<ChatbotScreens> {
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
     });
   }
 
   String _getBotResponse(String userMessage) {
     final lowerMessage = userMessage.toLowerCase();
-    
-    // Cari response berdasarkan keyword
     for (var responseGroup in _botResponses) {
       for (var keyword in responseGroup['keywords'] as List<String>) {
         if (lowerMessage.contains(keyword)) {
           final responses = responseGroup['responses'] as List<String>;
-          return responses[DateTime.now().millisecondsSinceEpoch % responses.length];
+          return responses[
+              DateTime.now().millisecondsSinceEpoch % responses.length];
         }
       }
     }
-    
+
     // Default responses
     final defaultResponses = [
       'Interesting question! Bisa jelasin lebih detail? 🤔',
@@ -170,8 +198,9 @@ class _ChatbotScreensState extends State<ChatbotScreens> {
       'Hold up! Let me think about that... 🧠',
       'That\'s deep bro! But honestly, consistency is the real answer 💯',
     ];
-    
-    return defaultResponses[DateTime.now().millisecondsSinceEpoch % defaultResponses.length];
+
+    return defaultResponses[
+        DateTime.now().millisecondsSinceEpoch % defaultResponses.length];
   }
 
   void _sendMessage() {
@@ -197,10 +226,10 @@ class _ChatbotScreensState extends State<ChatbotScreens> {
     });
   }
 
-  void _showQuickReplies() {
+  void _showQuickReplies(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: cardBackground,
+      backgroundColor: _getCardBackgroundColor(context),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -218,17 +247,17 @@ class _ChatbotScreensState extends State<ChatbotScreens> {
 
         return Container(
           padding: const EdgeInsets.all(20),
-          decoration: const BoxDecoration(
-            color: cardBackground,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          decoration: BoxDecoration(
+            color: _getCardBackgroundColor(context),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
+              Text(
                 'Quick Questions 🤙',
                 style: TextStyle(
-                  color: textPrimary,
+                  color: _getTextPrimaryColor(context),
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -250,14 +279,16 @@ class _ChatbotScreensState extends State<ChatbotScreens> {
                         vertical: 10,
                       ),
                       decoration: BoxDecoration(
-                        color: accent.withOpacity(0.2),
+                        color: _getPrimaryColor(context).withOpacity(0.2),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: accent.withOpacity(0.4)),
+                        border: Border.all(
+                          color: _getPrimaryColor(context).withOpacity(0.4),
+                        ),
                       ),
                       child: Text(
                         question,
-                        style: const TextStyle(
-                          color: lavender,
+                        style: TextStyle(
+                          color: _getPrimaryColor(context),
                           fontSize: 14,
                         ),
                       ),
@@ -273,24 +304,32 @@ class _ChatbotScreensState extends State<ChatbotScreens> {
     );
   }
 
-  Widget _buildMessageBubble(Message message) {
+  Widget _buildMessageBubble(BuildContext context, Message message) {
     final isUser = message.isUser;
-    
+    final primaryColor = _getPrimaryColor(context);
+    final cardBackgroundColor = _getCardBackgroundColor(context);
+    final textPrimaryColor = _getTextPrimaryColor(context);
+    final textSecondaryColor = _getTextSecondaryColor(context);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment:
+            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
           if (!isUser)
             Container(
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: wildberry,
+                color: primaryColor,
                 borderRadius: BorderRadius.circular(12),
-                gradient: const LinearGradient(
-                  colors: [wildberry, amethyst],
+                gradient: LinearGradient(
+                  colors: [
+                    primaryColor,
+                    primaryColor.withOpacity(0.8),
+                  ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -306,37 +345,50 @@ class _ChatbotScreensState extends State<ChatbotScreens> {
           if (!isUser) const SizedBox(width: 8),
           Flexible(
             child: Column(
-              crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              crossAxisAlignment:
+                  isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: isUser ? accent : cardBackground,
+                    color: isUser ? primaryColor : cardBackgroundColor,
                     borderRadius: BorderRadius.only(
                       topLeft: const Radius.circular(16),
                       topRight: const Radius.circular(16),
-                      bottomLeft: isUser ? const Radius.circular(16) : const Radius.circular(4),
-                      bottomRight: isUser ? const Radius.circular(4) : const Radius.circular(16),
+                      bottomLeft: isUser
+                          ? const Radius.circular(16)
+                          : const Radius.circular(4),
+                      bottomRight: isUser
+                          ? const Radius.circular(4)
+                          : const Radius.circular(16),
                     ),
                     gradient: isUser
-                        ? const LinearGradient(
-                            colors: [accent, iris],
+                        ? LinearGradient(
+                            colors: [
+                              primaryColor,
+                              primaryColor.withOpacity(0.9),
+                            ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           )
                         : LinearGradient(
-                            colors: [cardBackground.withOpacity(0.8), cardBackground],
+                            colors: [
+                              cardBackgroundColor.withOpacity(0.8),
+                              cardBackgroundColor,
+                            ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
                     border: Border.all(
-                      color: isUser ? Colors.transparent : lavender.withOpacity(0.2),
+                      color: isUser
+                          ? Colors.transparent
+                          : _getDividerColor(context),
                     ),
                   ),
                   child: Text(
                     message.text,
                     style: TextStyle(
-                      color: isUser ? Colors.white : textPrimary,
+                      color: isUser ? Colors.white : textPrimaryColor,
                       fontSize: 15,
                       height: 1.4,
                     ),
@@ -346,7 +398,7 @@ class _ChatbotScreensState extends State<ChatbotScreens> {
                 Text(
                   _formatTime(message.timestamp),
                   style: TextStyle(
-                    color: textSecondary.withOpacity(0.6),
+                    color: textSecondaryColor.withOpacity(0.6),
                     fontSize: 11,
                   ),
                 ),
@@ -359,10 +411,13 @@ class _ChatbotScreensState extends State<ChatbotScreens> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: accent,
+                color: primaryColor,
                 borderRadius: BorderRadius.circular(12),
-                gradient: const LinearGradient(
-                  colors: [orchid, accent],
+                gradient: LinearGradient(
+                  colors: [
+                    primaryColor,
+                    primaryColor.withOpacity(0.8),
+                  ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -386,14 +441,22 @@ class _ChatbotScreensState extends State<ChatbotScreens> {
 
   @override
   Widget build(BuildContext context) {
+    Provider.of<ThemeProvider>(context);
+    final backgroundColor = _getBackgroundColor(context);
+    final cardBackgroundColor = _getCardBackgroundColor(context);
+    final textPrimaryColor = _getTextPrimaryColor(context);
+    final textSecondaryColor = _getTextSecondaryColor(context);
+    final primaryColor = _getPrimaryColor(context);
+    final dividerColor = _getDividerColor(context);
+
     return Scaffold(
-      backgroundColor: background,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        backgroundColor: cardBackground,
+        backgroundColor: cardBackgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(FontAwesomeIcons.chevronLeft),
-          color: textPrimary,
+          color: primaryColor,
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
@@ -402,8 +465,11 @@ class _ChatbotScreensState extends State<ChatbotScreens> {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [wildberry, amethyst],
+                gradient: LinearGradient(
+                  colors: [
+                    primaryColor,
+                    primaryColor.withOpacity(0.8),
+                  ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -418,13 +484,13 @@ class _ChatbotScreensState extends State<ChatbotScreens> {
               ),
             ),
             const SizedBox(width: 12),
-            const Column(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'GymBro AI',
                   style: TextStyle(
-                    color: textPrimary,
+                    color: textPrimaryColor,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -432,7 +498,7 @@ class _ChatbotScreensState extends State<ChatbotScreens> {
                 Text(
                   'Online • Gen Z Style',
                   style: TextStyle(
-                    color: lavender,
+                    color: textSecondaryColor,
                     fontSize: 12,
                   ),
                 ),
@@ -443,12 +509,12 @@ class _ChatbotScreensState extends State<ChatbotScreens> {
         actions: [
           IconButton(
             icon: const Icon(FontAwesomeIcons.bolt),
-            color: lavender,
-            onPressed: _showQuickReplies,
+            color: primaryColor,
+            onPressed: () => _showQuickReplies(context),
           ),
           IconButton(
             icon: const Icon(FontAwesomeIcons.ellipsisVertical),
-            color: textSecondary,
+            color: textSecondaryColor,
             onPressed: () {
               // Show options
             },
@@ -468,8 +534,11 @@ class _ChatbotScreensState extends State<ChatbotScreens> {
                           width: 80,
                           height: 80,
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [wildberry, amethyst],
+                            gradient: LinearGradient(
+                              colors: [
+                                primaryColor,
+                                primaryColor.withOpacity(0.8),
+                              ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
@@ -483,19 +552,19 @@ class _ChatbotScreensState extends State<ChatbotScreens> {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        const Text(
+                        Text(
                           'GymBro AI 🤖',
                           style: TextStyle(
-                            color: textPrimary,
+                            color: textPrimaryColor,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
+                        Text(
                           'Ask me anything about fitness!\nGen Z style answers guaranteed 🔥',
                           style: TextStyle(
-                            color: textSecondary,
+                            color: textSecondaryColor,
                             fontSize: 14,
                           ),
                           textAlign: TextAlign.center,
@@ -507,23 +576,25 @@ class _ChatbotScreensState extends State<ChatbotScreens> {
                             vertical: 12,
                           ),
                           decoration: BoxDecoration(
-                            color: cardBackground,
+                            color: cardBackgroundColor,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: lavender.withOpacity(0.3)),
+                            border: Border.all(
+                              color: primaryColor.withOpacity(0.3),
+                            ),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
                                 FontAwesomeIcons.lightbulb,
-                                color: lavender,
+                                color: primaryColor,
                                 size: 16,
                               ),
-                              SizedBox(width: 8),
+                              const SizedBox(width: 8),
                               Text(
                                 'Try: "Workout buat pemula?"',
                                 style: TextStyle(
-                                  color: textSecondary,
+                                  color: textSecondaryColor,
                                   fontSize: 14,
                                 ),
                               ),
@@ -538,7 +609,7 @@ class _ChatbotScreensState extends State<ChatbotScreens> {
                     padding: const EdgeInsets.only(bottom: 16),
                     itemCount: _messages.length,
                     itemBuilder: (context, index) {
-                      return _buildMessageBubble(_messages[index]);
+                      return _buildMessageBubble(context, _messages[index]);
                     },
                   ),
           ),
@@ -553,7 +624,7 @@ class _ChatbotScreensState extends State<ChatbotScreens> {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: cardBackground,
+                      color: cardBackgroundColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Center(
@@ -567,15 +638,15 @@ class _ChatbotScreensState extends State<ChatbotScreens> {
                   Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: cardBackground,
+                      color: cardBackgroundColor,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        _buildTypingDot(0),
-                        _buildTypingDot(1),
-                        _buildTypingDot(2),
+                        _buildTypingDot(context, 0),
+                        _buildTypingDot(context, 1),
+                        _buildTypingDot(context, 2),
                       ],
                     ),
                   ),
@@ -587,48 +658,26 @@ class _ChatbotScreensState extends State<ChatbotScreens> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: cardBackground,
+              color: cardBackgroundColor,
               border: Border(
-                top: BorderSide(color: lavender.withOpacity(0.1)),
+                top: BorderSide(color: dividerColor),
               ),
             ),
             child: Row(
               children: [
                 Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: background,
-                      borderRadius: BorderRadius.circular(25),
-                      border: Border.all(color: lavender.withOpacity(0.2)),
+                  child: TextField(
+                    controller: _messageController,
+                    style: TextStyle(color: textPrimaryColor),
+                    decoration: InputDecoration(
+                      hintText: 'Massukkan pesan anda',
+                      hintStyle: TextStyle(
+                        color: textSecondaryColor.withOpacity(0.6),
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _messageController,
-                            style: const TextStyle(color: textPrimary),
-                            decoration: InputDecoration(
-                              hintText: 'Type your message...',
-                              hintStyle: TextStyle(color: textSecondary.withOpacity(0.6)),
-                              border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                            ),
-                            onSubmitted: (_) => _sendMessage(),
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(
-                            FontAwesomeIcons.faceSmile,
-                            color: lavender,
-                            size: 20,
-                          ),
-                          onPressed: () {
-                            // Emoji picker
-                          },
-                        ),
-                      ],
-                    ),
+                    onSubmitted: (_) => _sendMessage(),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -636,18 +685,23 @@ class _ChatbotScreensState extends State<ChatbotScreens> {
                   width: 50,
                   height: 50,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [accent, orchid],
+                    gradient: LinearGradient(
+                      colors: [
+                        primaryColor,
+                        primaryColor.withOpacity(0.8),
+                      ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(25),
                   ),
                   child: IconButton(
-                    icon: const Icon(
-                      FontAwesomeIcons.paperPlane,
-                      color: Colors.white,
-                      size: 20,
+                    icon: const Center(
+                      child: Icon(
+                        Icons.send,
+                        color: Colors.white,
+                        size: 24,
+                      ),
                     ),
                     onPressed: _sendMessage,
                   ),
@@ -660,14 +714,14 @@ class _ChatbotScreensState extends State<ChatbotScreens> {
     );
   }
 
-  Widget _buildTypingDot(int index) {
+  Widget _buildTypingDot(BuildContext context, int index) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: Container(
         width: 8,
         height: 8,
         decoration: BoxDecoration(
-          color: lavender.withOpacity(0.5),
+          color: _getPrimaryColor(context).withOpacity(0.5),
           borderRadius: BorderRadius.circular(4),
         ),
       ),

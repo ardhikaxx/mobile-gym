@@ -4,6 +4,8 @@ import 'package:flutter_application_1/pages/main_screen.dart';
 import 'package:flutter_application_1/service/auth_services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_application_1/providers/theme_provider.dart';
 
 /// ================= PALETTE WARNA UNGU =================
 class PurplePalette {
@@ -53,11 +55,25 @@ class _LoginPageState extends State<LoginPage> {
         idToken: googleAuth.idToken,
       );
 
-      return await FirebaseAuth.instance.signInWithCredential(credential);
+      final UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+
+      final User? user = userCredential.user;
+
+      if (user != null) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainScreen(initialBmi: 22.0),
+          ),
+          (route) => false,
+        );
+      }
     } catch (e) {
       print("ERROR LOGIN GOOGLE: $e");
       return null;
     }
+    return null;
   }
 
   final emailController = TextEditingController();
@@ -83,7 +99,7 @@ class _LoginPageState extends State<LoginPage> {
       if (result['success'] == true) {
         // Ambil data BMI dari response
         final bmi = result['data']['bmi'] ?? 22.0;
-        
+
         if (!mounted) return;
         Navigator.pushReplacement(
           context,
@@ -95,7 +111,7 @@ class _LoginPageState extends State<LoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result['message'] ?? "Login gagal"),
-            backgroundColor: Colors.red,
+            backgroundColor: Theme.of(context).colorScheme.error,
             duration: const Duration(seconds: 3),
           ),
         );
@@ -104,7 +120,7 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Terjadi kesalahan: $e"),
-          backgroundColor: Colors.red,
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     } finally {
@@ -134,33 +150,35 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Scaffold(
-      backgroundColor: PurplePalette.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: LayoutBuilder(
         builder: (context, c) {
           final isDesktop = c.maxWidth > 900;
-          return isDesktop ? _desktop() : _mobile();
+          return isDesktop ? _desktop(themeProvider) : _mobile(themeProvider);
         },
       ),
     );
   }
 
   /// ================= DESKTOP =================
-  Widget _desktop() {
+  Widget _desktop(ThemeProvider themeProvider) {
     return Row(
       children: [
         _leftInfo(),
-        Container(width: 1, color: Colors.black12),
-        Expanded(child: _form()),
+        Container(width: 1, color: Theme.of(context).dividerColor),
+        Expanded(child: _form(themeProvider)),
       ],
     );
   }
 
   /// ================= MOBILE =================
-  Widget _mobile() {
+  Widget _mobile(ThemeProvider themeProvider) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(28),
-      child: _form(),
+      child: _form(themeProvider),
     );
   }
 
@@ -169,29 +187,37 @@ class _LoginPageState extends State<LoginPage> {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(50),
-        color: Colors.white,
-        child: const Column(
+        color: Theme.of(context).cardColor,
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.fitness_center, color: PurplePalette.accent, size: 80),
-            SizedBox(height: 20),
+            const SizedBox(height: 40),
+            Icon(
+              Icons.fitness_center, 
+              color: Theme.of(context).primaryColor, 
+              size: 80
+            ),
+            const SizedBox(height: 20),
             Text(
               "GYM GENZ",
               style: TextStyle(
-                color: Colors.black,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 36,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               "Gym adalah tempat untuk melatih kekuatan fisik, "
               "meningkatkan kesehatan, membentuk tubuh, dan "
               "membangun gaya hidup yang lebih baik.\n\n"
               "Gabung bersama kami untuk memulai perjalanan "
               "fitnessmu dengan lebih fokus dan terarah.",
-              style: TextStyle(color: Colors.black54, height: 1.6),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7), 
+                height: 1.6
+              ),
             ),
           ],
         ),
@@ -199,7 +225,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _form() {
+  Widget _form(ThemeProvider themeProvider) {
     return Form(
       key: _formKey,
       child: Padding(
@@ -238,10 +264,10 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 20),
             // Judul
-            const Text(
+            Text(
               "Selamat Datang",
               style: TextStyle(
-                color: PurplePalette.textPrimary,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Poppins',
@@ -249,10 +275,10 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 8),
             // Subjudul
-            const Text(
+            Text(
               "Kembali berlatih, kembali kuat.",
               style: TextStyle(
-                color: PurplePalette.textSecondary,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                 fontSize: 16,
                 fontFamily: 'Poppins',
               ),
@@ -262,10 +288,10 @@ class _LoginPageState extends State<LoginPage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   "Email",
                   style: TextStyle(
-                    color: PurplePalette.textPrimary,
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
@@ -273,16 +299,18 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: emailController,
-                  style: const TextStyle(color: PurplePalette.textPrimary),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                   validator: _validateEmail,
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: PurplePalette.cardBackground,
+                    fillColor: Theme.of(context).cardColor,
                     hintText: "Masukkan Email",
-                    hintStyle: TextStyle(color: PurplePalette.textSecondary.withOpacity(0.7)),
-                    prefixIcon: const Icon(
+                    hintStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)
+                    ),
+                    prefixIcon: Icon(
                       FontAwesomeIcons.envelope,
-                      color: PurplePalette.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                       size: 20,
                     ),
                     border: OutlineInputBorder(
@@ -291,15 +319,31 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: PurplePalette.accent, width: 2),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).primaryColor, 
+                        width: 2
+                      ),
                     ),
                     errorBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: Colors.red, width: 1),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.error, 
+                        width: 1
+                      ),
                     ),
                     focusedErrorBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: Colors.red, width: 2),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.error, 
+                        width: 2
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).dividerColor,
+                        width: 1,
+                      ),
                     ),
                   ),
                 ),
@@ -310,10 +354,10 @@ class _LoginPageState extends State<LoginPage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   "Password",
                   style: TextStyle(
-                    color: PurplePalette.textPrimary,
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
@@ -322,16 +366,18 @@ class _LoginPageState extends State<LoginPage> {
                 TextFormField(
                   controller: passwordController,
                   obscureText: _obscure,
-                  style: const TextStyle(color: PurplePalette.textPrimary),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                   validator: _validatePassword,
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: PurplePalette.cardBackground,
+                    fillColor: Theme.of(context).cardColor,
                     hintText: "Masukkan password Anda",
-                    hintStyle: TextStyle(color: PurplePalette.textSecondary.withOpacity(0.7)),
-                    prefixIcon: const Icon(
+                    hintStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)
+                    ),
+                    prefixIcon: Icon(
                       FontAwesomeIcons.lock,
-                      color: PurplePalette.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                       size: 20,
                     ),
                     suffixIcon: IconButton(
@@ -340,7 +386,7 @@ class _LoginPageState extends State<LoginPage> {
                         _obscure
                             ? FontAwesomeIcons.eyeSlash
                             : FontAwesomeIcons.eye,
-                        color: PurplePalette.textSecondary,
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                         size: 20,
                       ),
                     ),
@@ -350,15 +396,31 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: PurplePalette.accent, width: 2),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).primaryColor, 
+                        width: 2
+                      ),
                     ),
                     errorBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: Colors.red, width: 1),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.error, 
+                        width: 1
+                      ),
                     ),
                     focusedErrorBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: Colors.red, width: 2),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.error, 
+                        width: 2
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).dividerColor,
+                        width: 1,
+                      ),
                     ),
                   ),
                 ),
@@ -390,7 +452,7 @@ class _LoginPageState extends State<LoginPage> {
                 onPressed: _isLoading ? null : _login,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,
-                  foregroundColor: PurplePalette.textPrimary,
+                  foregroundColor: Colors.white,
                   shadowColor: Colors.transparent,
                   minimumSize: const Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
@@ -398,7 +460,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 child: _isLoading
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 24,
                         height: 24,
                         child: CircularProgressIndicator(
@@ -422,23 +484,23 @@ class _LoginPageState extends State<LoginPage> {
               children: [
                 Expanded(
                   child: Divider(
-                    color: PurplePalette.textSecondary.withOpacity(0.3),
+                    color: Theme.of(context).dividerColor,
                     thickness: 1,
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Text(
                     "Atau login dengan",
                     style: TextStyle(
-                      color: PurplePalette.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                       fontSize: 14,
                     ),
                   ),
                 ),
                 Expanded(
                   child: Divider(
-                    color: PurplePalette.textSecondary.withOpacity(0.3),
+                    color: Theme.of(context).dividerColor,
                     thickness: 1,
                   ),
                 ),
@@ -452,8 +514,6 @@ class _LoginPageState extends State<LoginPage> {
                   : () async {
                       final result = await loginWithGoogle();
                       if (result != null) {
-                        // Untuk login Google, arahkan ke halaman isi data
-                        // atau langsung ke main screen sesuai kebutuhan
                         if (!mounted) return;
                         Navigator.pushReplacementNamed(context, '/isidata');
                       }
@@ -463,21 +523,21 @@ class _LoginPageState extends State<LoginPage> {
                 width: 24,
                 height: 24,
               ),
-              label: const Text(
+              label: Text(
                 "Google",
                 style: TextStyle(
-                  color: Colors.black,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
-                side: BorderSide(color: PurplePalette.textSecondary.withOpacity(0.3)),
+                side: BorderSide(color: Theme.of(context).primaryColor, width: 1.8),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
-                backgroundColor: Colors.white,
+                backgroundColor: Theme.of(context).cardColor,
               ),
             ),
             const SizedBox(height: 20),
@@ -485,21 +545,22 @@ class _LoginPageState extends State<LoginPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
+                Text(
                   "Belum punya akun? ",
                   style: TextStyle(
-                    color: PurplePalette.textSecondary,
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                     fontSize: 14,
                   ),
                 ),
                 TextButton(
                   onPressed: _isLoading
                       ? null
-                      : () => Navigator.pushReplacementNamed(context, '/register'),
-                  child: const Text(
+                      : () =>
+                          Navigator.pushReplacementNamed(context, '/register'),
+                  child: Text(
                     "Daftar sekarang",
                     style: TextStyle(
-                      color: PurplePalette.lavender,
+                      color: Theme.of(context).primaryColor,
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),

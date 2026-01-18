@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/service/jadwal_workout_services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_application_1/providers/theme_provider.dart';
 
 /// ================= PALETTE WARNA UNGU =================
 class PurplePalette {
@@ -124,18 +126,18 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
   }
 
   Widget _buildLoadingState() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(
-            color: PurplePalette.orchid,
+            color: Theme.of(context).primaryColor,
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Text(
             'Memuat jadwal workout...',
             style: TextStyle(
-              color: PurplePalette.textSecondary,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
               fontSize: 16,
             ),
           ),
@@ -157,8 +159,8 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
           const SizedBox(height: 20),
           Text(
             _errorMessage,
-            style: const TextStyle(
-              color: PurplePalette.textPrimary,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 16,
               fontWeight: FontWeight.w500,
             ),
@@ -168,7 +170,7 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
           ElevatedButton(
             onPressed: _loadJadwal,
             style: ElevatedButton.styleFrom(
-              backgroundColor: PurplePalette.accent,
+              backgroundColor: Theme.of(context).primaryColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -192,25 +194,25 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
+          Icon(
             FontAwesomeIcons.calendarPlus,
-            color: PurplePalette.lilac,
+            color: Theme.of(context).primaryColor.withOpacity(0.7),
             size: 64,
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'Tidak ada jadwal workout hari ini',
             style: TextStyle(
-              color: PurplePalette.textPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 18,
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 10),
-          const Text(
+          Text(
             'Tambah jadwal workout baru untuk memulai',
             style: TextStyle(
-              color: PurplePalette.textSecondary,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
               fontSize: 14,
             ),
             textAlign: TextAlign.center,
@@ -221,7 +223,7 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
               // TODO: Navigate to add schedule page
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: PurplePalette.accent,
+              backgroundColor: Theme.of(context).primaryColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -250,8 +252,8 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text(
             time,
-            style: const TextStyle(
-              color: PurplePalette.textPrimary,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -267,7 +269,7 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: PurplePalette.cardBackground,
+        color: Theme.of(context).primaryColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: PurplePalette.mauve.withOpacity(0.3),
@@ -275,7 +277,7 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
         ),
         boxShadow: [
           BoxShadow(
-            color: PurplePalette.violet.withOpacity(0.1),
+            color: Colors.black.withOpacity(0.2),
             blurRadius: 10,
             spreadRadius: 1,
             offset: const Offset(0, 4),
@@ -288,14 +290,7 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  PurplePalette.orchid.withOpacity(0.3),
-                  PurplePalette.lavender.withOpacity(0.1),
-                ],
-              ),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: PurplePalette.orchid.withOpacity(0.5),
@@ -322,7 +317,7 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
                       child: Text(
                         jadwal.namaJadwal,
                         style: const TextStyle(
-                          color: PurplePalette.textPrimary,
+                          color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -336,7 +331,7 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
                       },
                       icon: const Icon(
                         FontAwesomeIcons.chevronRight,
-                        color: PurplePalette.textSecondary,
+                        color: PurplePalette.textPrimary,
                         size: 20,
                       ),
                     ),
@@ -352,14 +347,7 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            PurplePalette.orchid.withOpacity(0.3),
-                            PurplePalette.lavender.withOpacity(0.1),
-                          ],
-                        ),
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: PurplePalette.orchid.withOpacity(0.5),
@@ -368,9 +356,8 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
                       ),
                       child: Text(
                         jadwal.kategoriJadwal,
-                        // ignore: prefer_const_constructors
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Theme.of(context).primaryColor,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                         ),
@@ -379,32 +366,32 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           FontAwesomeIcons.clock,
-                          color: PurplePalette.textSecondary,
+                          color: Colors.grey[100],
                           size: 14,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           jadwal.formattedTime,
-                          style: const TextStyle(
-                            color: PurplePalette.textSecondary,
+                          style: TextStyle(
+                            color: Colors.grey[100],
                             fontSize: 14,
                           ),
                         ),
                         const SizedBox(width: 8),
-                        const Text(
+                        Text(
                           "•",
                           style: TextStyle(
-                            color: PurplePalette.textSecondary,
+                            color: Colors.grey[100],
                             fontSize: 14,
                           ),
                         ),
                         const SizedBox(width: 8),
                         Text(
                           jadwal.durasiWorkout,
-                          style: const TextStyle(
-                            color: PurplePalette.textSecondary,
+                          style: TextStyle(
+                            color: Colors.grey[100],
                             fontSize: 14,
                           ),
                         ),
@@ -422,15 +409,18 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
 
   @override
   Widget build(BuildContext context) {
+    Provider.of<ThemeProvider>(context);
+
     return Scaffold(
-      backgroundColor: PurplePalette.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: PurplePalette.background,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
-        title: const Text(
+        automaticallyImplyLeading: false,
+        title: Text(
           "Jadwal Workout",
           style: TextStyle(
-            color: PurplePalette.textPrimary,
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 26,
             fontWeight: FontWeight.bold,
             fontFamily: 'Poppins',
@@ -440,9 +430,9 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
         actions: [
           IconButton(
             onPressed: _loadJadwal,
-            icon: const Icon(
+            icon: Icon(
               Icons.refresh,
-              color: PurplePalette.lavender,
+              color: Theme.of(context).primaryColor,
             ),
           ),
         ],
@@ -450,9 +440,10 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
       body: SafeArea(
         child: Column(
           children: [
+            const SizedBox(height: 20),
             /// ================= FILTER BUTTONS =================
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: SizedBox(
                 height: 40,
                 child: ListView.builder(
@@ -480,21 +471,30 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
                               : null,
                           color: _selectedFilter == index
                               ? null
-                              : PurplePalette.cardBackground,
+                              : Theme.of(context).cardColor,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: _selectedFilter == index
                                 ? filterColors[index]
-                                : PurplePalette.mauve.withOpacity(0.5),
+                                : Theme.of(context).primaryColor,
                           ),
+                          boxShadow: _selectedFilter == index
+                              ? [
+                                  BoxShadow(
+                                    color: filterColors[index].withOpacity(0.3),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ]
+                              : null,
                         ),
                         child: Center(
                           child: Text(
                             filterNames[index],
                             style: TextStyle(
                               color: _selectedFilter == index
-                                  ? PurplePalette.textPrimary
-                                  : PurplePalette.textSecondary,
+                                  ? Colors.white
+                                  : Theme.of(context).primaryColor,
                               fontWeight: FontWeight.w600,
                               fontSize: 14,
                             ),
@@ -518,16 +518,19 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
                     children: [
                       Text(
                         _currentDate,
-                        style: const TextStyle(
-                          color: PurplePalette.textPrimary,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const Text(
+                      Text(
                         "Hari ini",
                         style: TextStyle(
-                          color: PurplePalette.textSecondary,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.7),
                           fontSize: 14,
                         ),
                       ),
@@ -539,17 +542,18 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: PurplePalette.wildberry.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
+                      color: Theme.of(context).primaryColor,
+                      borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: PurplePalette.wildberry,
+                        color: PurplePalette.mauve.withOpacity(0.3),
+                        width: 1,
                       ),
                     ),
                     child: Row(
                       children: [
                         const Icon(
                           FontAwesomeIcons.dumbbell,
-                          color: PurplePalette.lavender,
+                          color: PurplePalette.textPrimary,
                           size: 14,
                         ),
                         const SizedBox(width: 6),
@@ -558,7 +562,7 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
                               ? "${_jadwalResponse!.total} Workouts"
                               : "0 Workouts",
                           style: const TextStyle(
-                            color: PurplePalette.lavender,
+                            color: PurplePalette.textPrimary,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -581,6 +585,7 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
                               _jadwalResponse!.jadwals.isEmpty
                           ? _buildEmptyState()
                           : SingleChildScrollView(
+                              physics: const AlwaysScrollableScrollPhysics(),
                               padding: const EdgeInsets.only(bottom: 16),
                               child: Column(
                                 children: [
@@ -591,7 +596,7 @@ class _PenjadwalanPageState extends State<PenjadwalanPage> {
                                             entry.key, entry.value);
                                       }
                                       return Container();
-                                    }).toList()
+                                    })
                                   else
                                     ..._getFilteredJadwal().map(
                                         (jadwal) => _buildWorkoutCard(jadwal)),

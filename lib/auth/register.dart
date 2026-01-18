@@ -4,6 +4,8 @@ import 'package:flutter_application_1/auth/login.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_application_1/service/auth_services.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_application_1/providers/theme_provider.dart';
 
 /// ================= PALETTE WARNA UNGU =================
 class PurplePalette {
@@ -138,45 +140,47 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   void _showSuccessDialog() {
+    Provider.of<ThemeProvider>(context, listen: false);
+    
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        backgroundColor: PurplePalette.cardBackground,
+        backgroundColor: Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: BorderSide(
-            color: PurplePalette.lavender.withOpacity(0.3),
+            color: Theme.of(context).primaryColor.withOpacity(0.3),
           ),
         ),
-        title: const Text(
+        title: Text(
           "Registrasi Berhasil!",
           style: TextStyle(
-            color: PurplePalette.textPrimary,
+            color: Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.bold,
           ),
         ),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               FontAwesomeIcons.userCheck,
-              color: PurplePalette.lavender,
+              color: Theme.of(context).primaryColor,
               size: 48,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               "Akun Anda telah berhasil dibuat.",
               style: TextStyle(
-                color: PurplePalette.textSecondary,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               "Silakan login untuk melanjutkan.",
               style: TextStyle(
-                color: PurplePalette.textSecondary,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                 fontSize: 12,
               ),
               textAlign: TextAlign.center,
@@ -202,7 +206,7 @@ class _RegisterPageState extends State<RegisterPage> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.transparent,
-                foregroundColor: PurplePalette.textPrimary,
+                foregroundColor: Colors.white,
                 shadowColor: Colors.transparent,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -220,7 +224,7 @@ class _RegisterPageState extends State<RegisterPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.red,
+        backgroundColor: Theme.of(context).colorScheme.error,
       ),
     );
   }
@@ -305,10 +309,12 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Scaffold(
-      backgroundColor: PurplePalette.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: PurplePalette.background,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
         leading: IconButton(
           onPressed: () => Navigator.push(
@@ -319,15 +325,12 @@ class _RegisterPageState extends State<RegisterPage> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: PurplePalette.cardBackground,
+              color: Theme.of(context).primaryColor,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: PurplePalette.mauve.withOpacity(0.5),
-              ),
             ),
             child: const Icon(
               Icons.arrow_back_ios_new_rounded,
-              color: PurplePalette.textPrimary,
+              color: Colors.white,
               size: 20,
             ),
           ),
@@ -336,32 +339,32 @@ class _RegisterPageState extends State<RegisterPage> {
       body: LayoutBuilder(
         builder: (context, c) {
           final isDesktop = c.maxWidth > 900;
-          return isDesktop ? _desktop() : _mobile();
+          return isDesktop ? _desktop(themeProvider) : _mobile(themeProvider);
         },
       ),
     );
   }
 
   /// ================= DESKTOP =================
-  Widget _desktop() {
+  Widget _desktop(ThemeProvider themeProvider) {
     return Row(
       children: [
-        _leftInfo(),
-        Container(width: 1, color: Colors.black12),
-        Expanded(child: _form()),
+        _leftInfo(themeProvider),
+        Container(width: 1, color: Theme.of(context).dividerColor),
+        Expanded(child: _form(themeProvider)),
       ],
     );
   }
 
   /// ================= MOBILE =================
-  Widget _mobile() {
+  Widget _mobile(ThemeProvider themeProvider) {
     return SingleChildScrollView(
-      child: _form(),
+      child: _form(themeProvider),
     );
   }
 
   /// ================= LEFT INFO =================
-  Widget _leftInfo() {
+  Widget _leftInfo(ThemeProvider themeProvider) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(50),
@@ -386,7 +389,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 color: Colors.white.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(25),
                 border: Border.all(
-                  color: PurplePalette.lavender.withOpacity(0.3),
+                  color: Colors.white.withOpacity(0.3),
                 ),
               ),
               child: const Icon(
@@ -463,7 +466,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   /// ================= FORM =================
-  Widget _form() {
+  Widget _form(ThemeProvider themeProvider) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Form(
@@ -471,20 +474,20 @@ class _RegisterPageState extends State<RegisterPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               "Buat Akun Baru",
               style: TextStyle(
-                color: PurplePalette.textPrimary,
+                color: Theme.of(context).primaryColor,
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Poppins',
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               "Bergabung dan mulai perjalanan fitness Anda!",
               style: TextStyle(
-                color: PurplePalette.textSecondary,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                 fontSize: 16,
                 fontFamily: 'Poppins',
               ),
@@ -563,7 +566,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 fit: BoxFit.cover,
                               ),
                             )
-                          : const Icon(
+                          : Icon(
                               FontAwesomeIcons.camera,
                               color: Colors.white,
                               size: 30,
@@ -572,8 +575,8 @@ class _RegisterPageState extends State<RegisterPage> {
                     const SizedBox(height: 8),
                     Text(
                       _fotoProfile != null ? "Ubah Foto" : "Tambahkan Foto",
-                      style: const TextStyle(
-                        color: PurplePalette.lavender,
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                       ),
@@ -587,6 +590,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
             /// ================= NAMA LENGKAP =================
             _buildTextField(
+              context: context,
               controller: _nameController,
               label: "Nama Lengkap",
               hint: "Masukkan nama lengkap Anda",
@@ -598,6 +602,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
             /// ================= EMAIL =================
             _buildTextField(
+              context: context,
               controller: _emailController,
               label: "Email",
               hint: "Masukkan email Anda",
@@ -610,6 +615,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
             /// ================= PASSWORD =================
             _buildPasswordField(
+              context: context,
               controller: _passwordController,
               label: "Password",
               hint: "Masukkan password Anda",
@@ -626,6 +632,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
             /// ================= KONFIRMASI PASSWORD =================
             _buildPasswordField(
+              context: context,
               controller: _confirmPasswordController,
               label: "Konfirmasi Password",
               hint: "Masukkan ulang password Anda",
@@ -644,10 +651,10 @@ class _RegisterPageState extends State<RegisterPage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   "Jenis Kelamin *",
                   style: TextStyle(
-                    color: PurplePalette.textPrimary,
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
@@ -657,6 +664,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   children: [
                     Expanded(
                       child: _buildGenderOption(
+                        context: context,
                         value: 'L',
                         label: 'Laki-laki',
                         icon: FontAwesomeIcons.mars,
@@ -665,6 +673,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: _buildGenderOption(
+                        context: context,
                         value: 'P',
                         label: 'Perempuan',
                         icon: FontAwesomeIcons.venus,
@@ -676,7 +685,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 Text(
                   "* Wajib dipilih",
                   style: TextStyle(
-                    color: PurplePalette.textSecondary.withOpacity(0.7),
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                     fontSize: 12,
                   ),
                 ),
@@ -690,6 +699,7 @@ class _RegisterPageState extends State<RegisterPage> {
               children: [
                 Expanded(
                   child: _buildTextField(
+                    context: context,
                     controller: _tinggiBadanController,
                     label: "Tinggi Badan (cm)",
                     hint: "Contoh: 175 (50-250 cm)",
@@ -701,6 +711,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: _buildTextField(
+                    context: context,
                     controller: _beratBadanController,
                     label: "Berat Badan (kg)",
                     hint: "Contoh: 70 (20-300 kg)",
@@ -716,6 +727,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
             /// ================= ALERGI =================
             _buildTextField(
+              context: context,
               controller: _alergiController,
               label: "Alergi (Opsional)",
               hint: "Contoh: udang, kacang, seafood",
@@ -729,10 +741,10 @@ class _RegisterPageState extends State<RegisterPage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   "Golongan Darah",
                   style: TextStyle(
-                    color: PurplePalette.textPrimary,
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
@@ -741,27 +753,27 @@ class _RegisterPageState extends State<RegisterPage> {
                 Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: PurplePalette.cardBackground,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: PurplePalette.mauve.withOpacity(0.3),
+                      color: Theme.of(context).dividerColor,
                     ),
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       value: _golonganDarah,
                       isExpanded: true,
-                      dropdownColor: PurplePalette.cardBackground,
-                      icon: const Padding(
-                        padding: EdgeInsets.only(right: 12),
+                      dropdownColor: Theme.of(context).cardColor,
+                      icon: Padding(
+                        padding: const EdgeInsets.only(right: 12),
                         child: Icon(
                           FontAwesomeIcons.chevronDown,
-                          color: PurplePalette.textSecondary,
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                           size: 18,
                         ),
                       ),
-                      style: const TextStyle(
-                        color: PurplePalette.textPrimary,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 16,
                       ),
                       hint: Padding(
@@ -769,7 +781,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         child: Text(
                           "Pilih Golongan Darah",
                           style: TextStyle(
-                            color: PurplePalette.textSecondary.withOpacity(0.7),
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                           ),
                         ),
                       ),
@@ -782,9 +794,8 @@ class _RegisterPageState extends State<RegisterPage> {
                               item['label'],
                               style: TextStyle(
                                 color: item['value'] == null
-                                    ? PurplePalette.textSecondary
-                                        .withOpacity(0.7)
-                                    : PurplePalette.textPrimary,
+                                    ? Theme.of(context).colorScheme.onSurface.withOpacity(0.7)
+                                    : Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                           ),
@@ -802,7 +813,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 Text(
                   "Pilih golongan darah Anda (opsional)",
                   style: TextStyle(
-                    color: PurplePalette.textSecondary.withOpacity(0.7),
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                     fontSize: 12,
                   ),
                 ),
@@ -823,7 +834,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: PurplePalette.violet.withOpacity(0.3),
+                    color: Colors.black.withOpacity(0.3),
                     blurRadius: 15,
                     spreadRadius: 2,
                     offset: const Offset(0, 4),
@@ -834,7 +845,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 onPressed: _isLoading ? null : _register,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,
-                  foregroundColor: PurplePalette.textPrimary,
+                  foregroundColor: Colors.white,
                   shadowColor: Colors.transparent,
                   minimumSize: const Size(double.infinity, 56),
                   shape: RoundedRectangleBorder(
@@ -877,20 +888,20 @@ class _RegisterPageState extends State<RegisterPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
+                  Text(
                     "Sudah punya akun?",
                     style: TextStyle(
-                      color: PurplePalette.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                       fontSize: 16,
                     ),
                   ),
                   TextButton(
                     onPressed: () =>
                         Navigator.pushReplacementNamed(context, '/login'),
-                    child: const Text(
+                    child: Text(
                       "Masuk",
                       style: TextStyle(
-                        color: PurplePalette.lavender,
+                        color: Theme.of(context).primaryColor,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -908,6 +919,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Widget _buildTextField({
+    required BuildContext context,
     required TextEditingController controller,
     required String label,
     required String hint,
@@ -921,8 +933,8 @@ class _RegisterPageState extends State<RegisterPage> {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: PurplePalette.textPrimary,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
@@ -933,17 +945,17 @@ class _RegisterPageState extends State<RegisterPage> {
           validator: validator,
           keyboardType: keyboardType,
           maxLines: maxLines,
-          style: const TextStyle(color: PurplePalette.textPrimary),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
           decoration: InputDecoration(
             filled: true,
-            fillColor: PurplePalette.cardBackground,
+            fillColor: Theme.of(context).cardColor,
             hintText: hint,
             hintStyle: TextStyle(
-              color: PurplePalette.textSecondary.withOpacity(0.7),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
             ),
             prefixIcon: Icon(
               icon,
-              color: PurplePalette.textSecondary,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
               size: 20,
             ),
             border: OutlineInputBorder(
@@ -952,23 +964,30 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: PurplePalette.accent,
+              borderSide: BorderSide(
+                color: Theme.of(context).primaryColor,
                 width: 2,
               ),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: Colors.red,
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.error,
                 width: 1,
               ),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: Colors.red,
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.error,
                 width: 2,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(
+                color: Theme.of(context).dividerColor,
+                width: 1,
               ),
             ),
           ),
@@ -978,6 +997,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Widget _buildPasswordField({
+    required BuildContext context,
     required TextEditingController controller,
     required String label,
     required String hint,
@@ -990,8 +1010,8 @@ class _RegisterPageState extends State<RegisterPage> {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: PurplePalette.textPrimary,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
@@ -1001,24 +1021,24 @@ class _RegisterPageState extends State<RegisterPage> {
           controller: controller,
           obscureText: obscureText,
           validator: validator,
-          style: const TextStyle(color: PurplePalette.textPrimary),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
           decoration: InputDecoration(
             filled: true,
-            fillColor: PurplePalette.cardBackground,
+            fillColor: Theme.of(context).cardColor,
             hintText: hint,
             hintStyle: TextStyle(
-              color: PurplePalette.textSecondary.withOpacity(0.7),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
             ),
-            prefixIcon: const Icon(
+            prefixIcon: Icon(
               FontAwesomeIcons.lock,
-              color: PurplePalette.textSecondary,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
               size: 20,
             ),
             suffixIcon: IconButton(
               onPressed: onToggleObscure,
               icon: Icon(
                 obscureText ? FontAwesomeIcons.eyeSlash : FontAwesomeIcons.eye,
-                color: PurplePalette.textSecondary,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                 size: 20,
               ),
             ),
@@ -1028,23 +1048,30 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: PurplePalette.accent,
+              borderSide: BorderSide(
+                color: Theme.of(context).primaryColor,
                 width: 2,
               ),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: Colors.red,
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.error,
                 width: 1,
               ),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
-                color: Colors.red,
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.error,
                 width: 2,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(
+                color: Theme.of(context).dividerColor,
+                width: 1,
               ),
             ),
           ),
@@ -1054,6 +1081,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Widget _buildGenderOption({
+    required BuildContext context,
     required String value,
     required String label,
     required IconData icon,
@@ -1069,13 +1097,13 @@ class _RegisterPageState extends State<RegisterPage> {
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         decoration: BoxDecoration(
           color: isSelected
-              ? PurplePalette.orchid.withOpacity(0.2)
-              : PurplePalette.cardBackground,
+              ? Theme.of(context).primaryColor.withOpacity(0.2)
+              : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected
-                ? PurplePalette.orchid
-                : PurplePalette.mauve.withOpacity(0.3),
+                ? Theme.of(context).primaryColor
+                : Theme.of(context).dividerColor,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -1085,8 +1113,8 @@ class _RegisterPageState extends State<RegisterPage> {
             Icon(
               icon,
               color: isSelected
-                  ? PurplePalette.lavender
-                  : PurplePalette.textSecondary,
+                  ? Theme.of(context).primaryColor
+                  : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
               size: 18,
             ),
             const SizedBox(width: 8),
@@ -1094,8 +1122,8 @@ class _RegisterPageState extends State<RegisterPage> {
               label,
               style: TextStyle(
                 color: isSelected
-                    ? PurplePalette.textPrimary
-                    : PurplePalette.textSecondary,
+                    ? Theme.of(context).primaryColor
+                    : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
             ),

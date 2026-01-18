@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_application_1/providers/theme_provider.dart';
 import 'package:flutter_application_1/service/auth_services.dart';
 import 'package:flutter_application_1/service/workout_services.dart';
 import 'package:flutter_application_1/utils/session_manager.dart';
@@ -29,9 +31,6 @@ class PurplePalette {
   static const Color warning = Color(0xFFFF9800);
   static const Color error = Color(0xFFF44336);
 }
-
-/// ================= THEME CONTROLLER =================
-final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.dark);
 
 /// ================= PROFILE NAME =================
 final ValueNotifier<String> nameNotifier = ValueNotifier("User");
@@ -79,7 +78,6 @@ class _HomePageState extends State<HomePage> {
     ]);
   }
 
-  // Method untuk memuat data user
   Future<void> _loadUserData() async {
     try {
       setState(() {
@@ -87,19 +85,15 @@ class _HomePageState extends State<HomePage> {
         _userErrorMessage = '';
       });
 
-      // Coba ambil dari cache/local storage terlebih dahulu
       final cachedUserData = await SessionManager.getUserData();
       if (cachedUserData != null) {
         setState(() {
           _userData = cachedUserData;
           _isLoadingUser = false;
         });
-
-        // Update nameNotifier untuk widget lain
         nameNotifier.value = _userData?['nama_lengkap'] ?? 'User';
       }
 
-      // Kemudian fetch fresh data dari API
       final result = await AuthService.getProfile();
 
       if (result['success'] == true) {
@@ -108,10 +102,8 @@ class _HomePageState extends State<HomePage> {
           _isLoadingUser = false;
         });
 
-        // Update nameNotifier untuk widget lain
         nameNotifier.value = _userData?['nama_lengkap'] ?? 'User';
       } else {
-        // Jika gagal fetch dari API, tetap gunakan data cache
         if (_userData == null) {
           setState(() {
             _userErrorMessage = result['message'] ?? 'Gagal memuat data user';
@@ -127,7 +119,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  // Method untuk memuat data workout
   Future<void> _loadWorkoutData() async {
     try {
       setState(() {
@@ -135,14 +126,11 @@ class _HomePageState extends State<HomePage> {
         _workoutErrorMessage = '';
       });
 
-      // Ambil data workout challenges (belum dimulai)
       final challengesResult =
           await WorkoutService.getWorkoutChallengesWithRetry();
 
-      // Ambil data workout history (sudah selesai)
       final historyResult = await WorkoutService.getWorkoutHistoryWithRetry();
 
-      // Ambil data statistics
       final statsResult = await WorkoutService.getWorkoutStatistics();
 
       if (challengesResult['success'] == true) {
@@ -224,11 +212,11 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: PurplePalette.cardBackground,
+          backgroundColor: Theme.of(context).cardColor,
           title: Text(
             workout.namaWorkout,
-            style: const TextStyle(
-              color: PurplePalette.textPrimary,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           content: Column(
@@ -237,8 +225,9 @@ class _HomePageState extends State<HomePage> {
             children: [
               Text(
                 workout.deskripsi,
-                style: const TextStyle(
-                  color: PurplePalette.textSecondary,
+                style: TextStyle(
+                  color:
+                      Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                 ),
               ),
               const SizedBox(height: 16),
@@ -253,8 +242,9 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 12),
               Text(
                 'Equipment: ${workout.equipment}',
-                style: const TextStyle(
-                  color: PurplePalette.textSecondary,
+                style: TextStyle(
+                  color:
+                      Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                   fontSize: 12,
                 ),
               ),
@@ -262,8 +252,8 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 12),
                 Text(
                   'Jadwal: ${workout.jadwal!.namaJadwal} (${workout.jadwal!.formattedTime})',
-                  style: const TextStyle(
-                    color: PurplePalette.lavender,
+                  style: TextStyle(
+                    color: Theme.of(context).primaryColor,
                     fontSize: 12,
                   ),
                 ),
@@ -273,9 +263,13 @@ class _HomePageState extends State<HomePage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text(
+              child: Text(
                 'Tutup',
-                style: TextStyle(color: PurplePalette.textSecondary),
+                style: TextStyle(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.7)),
               ),
             ),
             if (workout.isNotStarted)
@@ -285,7 +279,7 @@ class _HomePageState extends State<HomePage> {
                   _startWorkout(workout);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: PurplePalette.accent,
+                  backgroundColor: Theme.of(context).primaryColor,
                 ),
                 child: const Text('Mulai Workout'),
               ),
@@ -300,14 +294,14 @@ class _HomePageState extends State<HomePage> {
       children: [
         Icon(
           icon,
-          color: PurplePalette.textSecondary,
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
           size: 16,
         ),
         const SizedBox(width: 4),
         Text(
           text,
-          style: const TextStyle(
-            color: PurplePalette.textSecondary,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
             fontSize: 14,
           ),
         ),
@@ -336,18 +330,18 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildLoadingIndicator() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(
-            color: PurplePalette.orchid,
+            color: Theme.of(context).primaryColor,
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Text(
             'Memuat...',
             style: TextStyle(
-              color: PurplePalette.textSecondary,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
             ),
           ),
         ],
@@ -360,16 +354,16 @@ class _HomePageState extends State<HomePage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const SizedBox(height: 80),
-        const Icon(
+        Icon(
           FontAwesomeIcons.dumbbell,
-          color: PurplePalette.lilac,
+          color: Theme.of(context).primaryColor.withOpacity(0.7),
           size: 48,
         ),
         const SizedBox(height: 12),
         Text(
           title,
-          style: const TextStyle(
-            color: PurplePalette.textPrimary,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
@@ -377,8 +371,8 @@ class _HomePageState extends State<HomePage> {
         const SizedBox(height: 8),
         Text(
           message,
-          style: const TextStyle(
-            color: PurplePalette.textSecondary,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
           ),
           textAlign: TextAlign.center,
         ),
@@ -393,33 +387,18 @@ class _HomePageState extends State<HomePage> {
         width: 300,
         margin: const EdgeInsets.only(right: 16),
         decoration: BoxDecoration(
-          color: PurplePalette.cardBackground,
+          color: Theme.of(context).primaryColor,
           borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              PurplePalette.eggplant.withOpacity(0.3),
-              PurplePalette.violet.withOpacity(0.3),
-            ],
-          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Stack(
           children: [
-            // Gradient Overlay
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    PurplePalette.background.withOpacity(0.8),
-                  ],
-                ),
-              ),
-            ),
             Positioned(
               top: 16,
               left: 16,
@@ -429,7 +408,7 @@ class _HomePageState extends State<HomePage> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: PurplePalette.orchid.withOpacity(0.2),
+                  color: PurplePalette.textPrimary.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: PurplePalette.orchid.withOpacity(0.4),
@@ -456,7 +435,7 @@ class _HomePageState extends State<HomePage> {
                   Text(
                     workout.namaWorkout,
                     style: const TextStyle(
-                      color: PurplePalette.textPrimary,
+                      color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
@@ -466,8 +445,8 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(height: 4),
                   Text(
                     workout.deskripsi,
-                    style: const TextStyle(
-                      color: PurplePalette.textSecondary,
+                    style: TextStyle(
+                      color: Colors.grey[100],
                       fontSize: 14,
                     ),
                     maxLines: 2,
@@ -527,16 +506,15 @@ class _HomePageState extends State<HomePage> {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: PurplePalette.cardBackground,
+          color: Theme.of(context).primaryColor,
           borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              PurplePalette.eggplant.withOpacity(0.3),
-              PurplePalette.violet.withOpacity(0.3),
-            ],
-          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           children: [
@@ -545,12 +523,7 @@ class _HomePageState extends State<HomePage> {
               height: 60,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                gradient: LinearGradient(
-                  colors: [
-                    Color(workout.workoutColor).withOpacity(0.3),
-                    Color(workout.workoutColor).withOpacity(0.1),
-                  ],
-                ),
+                color: Colors.white,
                 border: Border.all(
                   color: Color(workout.workoutColor).withOpacity(0.5),
                   width: 2,
@@ -558,8 +531,8 @@ class _HomePageState extends State<HomePage> {
               ),
               child: Center(
                 child: Icon(
-                  workout.workoutIcon,
-                  color: Color(workout.workoutColor),
+                  Icons.fitness_center,
+                  color: Theme.of(context).primaryColor,
                   size: 28,
                 ),
               ),
@@ -575,7 +548,7 @@ class _HomePageState extends State<HomePage> {
                       Text(
                         workout.namaWorkout,
                         style: const TextStyle(
-                          color: PurplePalette.textPrimary,
+                          color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -589,7 +562,7 @@ class _HomePageState extends State<HomePage> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: statusColor.withOpacity(0.2),
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: statusColor.withOpacity(0.4),
@@ -608,6 +581,29 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                   const SizedBox(height: 8),
+                  if (workout.jadwal != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: PurplePalette.textPrimary,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: PurplePalette.textPrimary,
+                        ),
+                      ),
+                      child: Text(
+                        workout.jadwal!.kategoriJadwal,
+                        style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
                       _buildWorkoutDetail(
@@ -619,29 +615,6 @@ class _HomePageState extends State<HomePage> {
                         Icons.fitness_center,
                         workout.formattedExercises,
                       ),
-                      const Spacer(),
-                      if (workout.jadwal != null)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: PurplePalette.wildberry.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(
-                              color: PurplePalette.wildberry,
-                            ),
-                          ),
-                          child: Text(
-                            workout.jadwal!.kategoriJadwal,
-                            style: const TextStyle(
-                              color: PurplePalette.lavender,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
                     ],
                   ),
                 ],
@@ -652,7 +625,7 @@ class _HomePageState extends State<HomePage> {
               onPressed: () => _viewWorkoutDetail(workout),
               icon: const Icon(
                 FontAwesomeIcons.chevronRight,
-                color: PurplePalette.textSecondary,
+                color: PurplePalette.textPrimary,
                 size: 20,
               ),
             ),
@@ -667,14 +640,14 @@ class _HomePageState extends State<HomePage> {
       children: [
         Icon(
           icon,
-          color: PurplePalette.lavender,
+          color: Colors.grey[100],
           size: 16,
         ),
         const SizedBox(width: 6),
         Text(
           text,
-          style: const TextStyle(
-            color: PurplePalette.textSecondary,
+          style: TextStyle(
+            color: Colors.grey[100],
             fontSize: 14,
             fontWeight: FontWeight.w600,
           ),
@@ -688,14 +661,14 @@ class _HomePageState extends State<HomePage> {
       children: [
         Icon(
           icon,
-          color: PurplePalette.textSecondary,
+          color: Colors.grey[100],
           size: 14,
         ),
         const SizedBox(width: 4),
         Text(
           text,
-          style: const TextStyle(
-            color: PurplePalette.textSecondary,
+          style: TextStyle(
+            color: Colors.grey[100],
             fontSize: 14,
           ),
         ),
@@ -705,15 +678,17 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    Provider.of<ThemeProvider>(context);
+
     return Scaffold(
-      backgroundColor: PurplePalette.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       floatingActionButton: _buildChatbotFloatingButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endContained,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _refreshData,
-          color: PurplePalette.accent,
-          backgroundColor: PurplePalette.background,
+          color: Theme.of(context).primaryColor,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
@@ -732,13 +707,13 @@ class _HomePageState extends State<HomePage> {
                               ? Container(
                                   width: 52,
                                   height: 52,
-                                  decoration: const BoxDecoration(
+                                  decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: PurplePalette.cardBackground,
+                                    color: Theme.of(context).cardColor,
                                   ),
-                                  child: const Center(
+                                  child: Center(
                                     child: CircularProgressIndicator(
-                                      color: PurplePalette.accent,
+                                      color: Theme.of(context).primaryColor,
                                       strokeWidth: 2,
                                     ),
                                   ),
@@ -751,7 +726,7 @@ class _HomePageState extends State<HomePage> {
                                   child: CircleAvatar(
                                     radius: 26,
                                     backgroundColor:
-                                        PurplePalette.cardBackground,
+                                        Theme.of(context).cardColor,
                                     backgroundImage:
                                         _userData?['foto_profile'] != null
                                             ? NetworkImage(_profilePhotoUrl)
@@ -764,12 +739,15 @@ class _HomePageState extends State<HomePage> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 "WELCOME BACK",
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
-                                  color: PurplePalette.textSecondary,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withOpacity(0.7),
                                 ),
                               ),
                               Row(
@@ -779,18 +757,20 @@ class _HomePageState extends State<HomePage> {
                                     builder: (context, name, child) {
                                       return Text(
                                         "Hi, $_userName",
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
-                                          color: PurplePalette.textPrimary,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface,
                                         ),
                                       );
                                     },
                                   ),
                                   const SizedBox(width: 8),
-                                  const Icon(
+                                  Icon(
                                     FontAwesomeIcons.hands,
-                                    color: PurplePalette.accent,
+                                    color: Theme.of(context).primaryColor,
                                     size: 20,
                                   ),
                                 ],
@@ -887,8 +867,8 @@ class _HomePageState extends State<HomePage> {
                   ),
 
                 /// ================= DAILY CHALLENGE =================
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -897,7 +877,7 @@ class _HomePageState extends State<HomePage> {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: PurplePalette.textPrimary,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                         textAlign: TextAlign.start,
                       ),
@@ -938,16 +918,15 @@ class _HomePageState extends State<HomePage> {
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: PurplePalette.cardBackground,
+                        color: Theme.of(context).primaryColor,
                         borderRadius: BorderRadius.circular(16),
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            PurplePalette.eggplant.withOpacity(0.3),
-                            PurplePalette.violet.withOpacity(0.3),
-                          ],
-                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -958,7 +937,7 @@ class _HomePageState extends State<HomePage> {
                               Text(
                                 _userData!['nama_lengkap'],
                                 style: const TextStyle(
-                                  color: PurplePalette.textPrimary,
+                                  color: Colors.white,
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -966,15 +945,15 @@ class _HomePageState extends State<HomePage> {
                               const SizedBox(height: 4),
                               Text(
                                 'BMI: ${_userData!['bmi']?.toStringAsFixed(1) ?? widget.bmi.toStringAsFixed(1)}',
-                                style: const TextStyle(
-                                  color: PurplePalette.textSecondary,
+                                style: TextStyle(
+                                  color: Colors.grey[100],
                                   fontSize: 14,
                                 ),
                               ),
                               Text(
                                 'Status: ${_userData!['bmi_category'] ?? 'Normal'}',
-                                style: const TextStyle(
-                                  color: PurplePalette.lavender,
+                                style: TextStyle(
+                                  color: Colors.grey[100],
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -988,7 +967,8 @@ class _HomePageState extends State<HomePage> {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: PurplePalette.orchid.withOpacity(0.2),
+                                color:
+                                    PurplePalette.textPrimary.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
                                   color: PurplePalette.orchid.withOpacity(0.4),
@@ -999,7 +979,7 @@ class _HomePageState extends State<HomePage> {
                                     ? 'Laki-laki'
                                     : 'Perempuan',
                                 style: const TextStyle(
-                                  color: PurplePalette.lavender,
+                                  color: PurplePalette.textPrimary,
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -1011,8 +991,8 @@ class _HomePageState extends State<HomePage> {
                   ),
 
                 /// ================= COMPLETED WORKOUTS =================
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -1021,7 +1001,7 @@ class _HomePageState extends State<HomePage> {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: PurplePalette.textPrimary,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ],
@@ -1060,7 +1040,7 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder: (context) {
         return Dialog(
-          backgroundColor: PurplePalette.cardBackground,
+          backgroundColor: Theme.of(context).cardColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -1073,7 +1053,7 @@ class _HomePageState extends State<HomePage> {
                 // Foto Profile
                 CircleAvatar(
                   radius: 50,
-                  backgroundColor: PurplePalette.background,
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                   backgroundImage: _userData?['foto_profile'] != null
                       ? NetworkImage(_profilePhotoUrl)
                       : const NetworkImage(
@@ -1085,8 +1065,8 @@ class _HomePageState extends State<HomePage> {
                 // Nama Lengkap
                 Text(
                   _userData!['nama_lengkap'],
-                  style: const TextStyle(
-                    color: PurplePalette.textPrimary,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1096,8 +1076,11 @@ class _HomePageState extends State<HomePage> {
                 // Email
                 Text(
                   _userData!['email'],
-                  style: const TextStyle(
-                    color: PurplePalette.textSecondary,
+                  style: TextStyle(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.7),
                     fontSize: 14,
                   ),
                 ),
@@ -1121,7 +1104,7 @@ class _HomePageState extends State<HomePage> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: PurplePalette.background,
+                    color: Theme.of(context).scaffoldBackgroundColor,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -1144,7 +1127,7 @@ class _HomePageState extends State<HomePage> {
                     Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: PurplePalette.accent,
+                    backgroundColor: Theme.of(context).primaryColor,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -1166,16 +1149,16 @@ class _HomePageState extends State<HomePage> {
       children: [
         Text(
           title,
-          style: const TextStyle(
-            color: PurplePalette.textSecondary,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
             fontSize: 12,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
-            color: PurplePalette.textPrimary,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),

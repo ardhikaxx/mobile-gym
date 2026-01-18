@@ -44,20 +44,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            PurplePalette.orchid.withOpacity(0.1),
-            PurplePalette.cardBackground,
-          ],
-        ),
-        border: Border(
-          top: BorderSide(
-            color: PurplePalette.orchid.withOpacity(0.3),
-            width: 1,
-          ),
-        ),
+        color: const Color(0xFF79509D),
         boxShadow: [
           BoxShadow(
             color: PurplePalette.orchid.withOpacity(0.1),
@@ -71,12 +58,12 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
         child: CustomLineIndicatorBottomNavbar(
           selectedColor: Colors.white,
           unSelectedColor: PurplePalette.textSecondary,
-          backgroundColor: Colors.transparent,
+          backgroundColor: const Color(0xFF79509D),
           currentIndex: widget.currentIndex,
           onTap: widget.onTap,
           enableLineIndicator: true,
-          lineIndicatorWidth: 3,
-          indicatorType: IndicatorType.Top,
+          lineIndicatorWidth: 4,
+          indicatorType: IndicatorType.Bottom,
           customBottomBarItems: [
             CustomBottomBarItems(
               label: 'Home',
