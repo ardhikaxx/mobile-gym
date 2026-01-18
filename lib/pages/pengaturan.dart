@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/pages/feedback.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_application_1/providers/theme_provider.dart';
@@ -817,12 +818,11 @@ class _PengaturanPageState extends State<PengaturanPage> {
                               "Berikan saran atau kritik untuk aplikasi",
                           "color": Theme.of(context).primaryColor,
                           "onTap": () {
-                            // TODO: arahkan ke halaman/form feedback
-                            // contoh:
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(builder: (context) => FeedbackPage()),
-                            // );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const FeedbackPage()),
+                            );
                           },
                         },
                         {
