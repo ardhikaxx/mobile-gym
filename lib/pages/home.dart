@@ -79,22 +79,28 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadUserData() async {
-    try {
-      setState(() {
-        _isLoadingUser = true;
-        _userErrorMessage = '';
-      });
+    if (!mounted) return;
 
+    setState(() {
+      _isLoadingUser = true;
+      _userErrorMessage = '';
+    });
+
+    try {
       final cachedUserData = await SessionManager.getUserData();
+      if (!mounted) return;
+
       if (cachedUserData != null) {
         setState(() {
           _userData = cachedUserData;
           _isLoadingUser = false;
         });
+
         nameNotifier.value = _userData?['nama_lengkap'] ?? 'User';
       }
 
       final result = await AuthService.getProfile();
+      if (!mounted) return;
 
       if (result['success'] == true) {
         setState(() {
@@ -103,15 +109,14 @@ class _HomePageState extends State<HomePage> {
         });
 
         nameNotifier.value = _userData?['nama_lengkap'] ?? 'User';
-      } else {
-        if (_userData == null) {
-          setState(() {
-            _userErrorMessage = result['message'] ?? 'Gagal memuat data user';
-            _isLoadingUser = false;
-          });
-        }
+      } else if (_userData == null) {
+        setState(() {
+          _userErrorMessage = result['message'] ?? 'Gagal memuat data user';
+          _isLoadingUser = false;
+        });
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _userErrorMessage = 'Terjadi kesalahan: $e';
         _isLoadingUser = false;
@@ -120,51 +125,47 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadWorkoutData() async {
-    try {
-      setState(() {
-        _isLoadingWorkouts = true;
-        _workoutErrorMessage = '';
-      });
+    if (!mounted) return;
 
+    setState(() {
+      _isLoadingWorkouts = true;
+      _workoutErrorMessage = '';
+    });
+
+    try {
       final challengesResult =
           await WorkoutService.getWorkoutChallengesWithRetry();
+      if (!mounted) return;
 
       final historyResult = await WorkoutService.getWorkoutHistoryWithRetry();
+      if (!mounted) return;
 
       final statsResult = await WorkoutService.getWorkoutStatistics();
-
-      if (challengesResult['success'] == true) {
-        setState(() {
-          _workoutChallenges = challengesResult['data'] ?? [];
-        });
-      } else {
-        setState(() {
-          _workoutErrorMessage =
-              challengesResult['message'] ?? 'Gagal memuat workout challenges';
-        });
-      }
-
-      if (historyResult['success'] == true) {
-        setState(() {
-          _completedWorkouts = historyResult['data'] ?? [];
-        });
-      } else if (_workoutErrorMessage.isEmpty) {
-        setState(() {
-          _workoutErrorMessage =
-              historyResult['message'] ?? 'Gagal memuat workout history';
-        });
-      }
-
-      if (statsResult['success'] == true) {
-        setState(() {
-          _workoutStats = statsResult['data'] ?? _workoutStats;
-        });
-      }
+      if (!mounted) return;
 
       setState(() {
+        if (challengesResult['success'] == true) {
+          _workoutChallenges = challengesResult['data'] ?? [];
+        } else {
+          _workoutErrorMessage =
+              challengesResult['message'] ?? 'Gagal memuat workout challenges';
+        }
+
+        if (historyResult['success'] == true) {
+          _completedWorkouts = historyResult['data'] ?? [];
+        } else if (_workoutErrorMessage.isEmpty) {
+          _workoutErrorMessage =
+              historyResult['message'] ?? 'Gagal memuat workout history';
+        }
+
+        if (statsResult['success'] == true) {
+          _workoutStats = statsResult['data'] ?? _workoutStats;
+        }
+
         _isLoadingWorkouts = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _workoutErrorMessage = 'Terjadi kesalahan: $e';
         _isLoadingWorkouts = false;
