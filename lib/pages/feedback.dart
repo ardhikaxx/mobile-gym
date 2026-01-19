@@ -2,30 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_rating_stars/flutter_rating_stars.dart';
 import 'package:flutter_application_1/service/feedback_services.dart';
-
-/// ================= PALETTE WARNA UNGU =================
-class PurplePalette {
-  static const Color lavender = Color(0xFFE39FF6);
-  static const Color lilac = Color(0xFFBD93D3);
-  static const Color amethyst = Color(0xFF9966CC);
-  static const Color wildberry = Color(0xFF8B2991);
-  static const Color iris = Color(0xFF9866C5);
-  static const Color orchid = Color(0xFFAF69EE);
-  static const Color periwinkle = Color(0xFFBD93D3);
-  static const Color eggplant = Color(0xFF380385);
-  static const Color violet = Color(0xFF710193);
-  static const Color purple = Color(0xFFA32CC4);
-  static const Color mauve = Color(0xFF7A4A88);
-  static const Color heather = Color(0xFF9B7CB8);
-
-  static const Color background = Color(0xFF08030C);
-  static const Color cardBackground = Color(0xFF2C123A);
-  static const Color textPrimary = Colors.white;
-  static const Color textSecondary = Color(0xFFC7B8D6);
-  static const Color accent = purple;
-  static const Color success = Color(0xFF4CAF50);
-  static const Color info = Color(0xFF2196F3);
-}
+import 'package:provider/provider.dart';
+import 'package:flutter_application_1/providers/theme_provider.dart';
 
 class FeedbackPage extends StatefulWidget {
   const FeedbackPage({super.key});
@@ -85,7 +63,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
       reviewController.text = existingFeedback['feedback']['review'];
     }
 
-    final pageContext = context; // ⬅️ SIMPAN CONTEXT HALAMAN
+    final pageContext = context;
 
     showDialog(
       context: pageContext,
@@ -98,18 +76,44 @@ class _FeedbackPageState extends State<FeedbackPage> {
             return WillPopScope(
               onWillPop: () async => !isSubmitting,
               child: AlertDialog(
-                backgroundColor: PurplePalette.cardBackground,
+                backgroundColor: Theme.of(context).cardColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
-                ),
-                title: Text(
-                  existingFeedback != null
-                      ? "Edit Feedback"
-                      : "Tambah Feedback",
-                  style: const TextStyle(
-                    color: PurplePalette.textPrimary,
-                    fontWeight: FontWeight.bold,
+                  side: BorderSide(
+                    color: Theme.of(context).primaryColor.withOpacity(0.3),
                   ),
+                ),
+                title: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor.withOpacity(0.2),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          FontAwesomeIcons.commentDots,
+                          color: Theme.of(context).primaryColor,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      existingFeedback != null
+                          ? "Edit Feedback"
+                          : "Tambah Feedback",
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
                 content: Form(
                   key: formKey,
@@ -117,10 +121,13 @@ class _FeedbackPageState extends State<FeedbackPage> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("Rating",
-                          style: TextStyle(
-                              color: PurplePalette.textPrimary,
-                              fontWeight: FontWeight.bold)),
+                      Text(
+                        "Rating",
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       const SizedBox(height: 8),
                       Center(
                         child: RatingStars(
@@ -136,15 +143,21 @@ class _FeedbackPageState extends State<FeedbackPage> {
                           starCount: 5,
                           starSize: 32,
                           maxValue: 5,
-                          starColor: PurplePalette.orchid,
-                          starOffColor: PurplePalette.mauve.withOpacity(0.5),
+                          starColor: Theme.of(context).primaryColor,
+                          starOffColor: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.3),
                         ),
                       ),
                       const SizedBox(height: 20),
-                      const Text("Review",
-                          style: TextStyle(
-                              color: PurplePalette.textPrimary,
-                              fontWeight: FontWeight.bold)),
+                      Text(
+                        "Review",
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: reviewController,
@@ -158,14 +171,38 @@ class _FeedbackPageState extends State<FeedbackPage> {
                           }
                           return null;
                         },
-                        style:
-                            const TextStyle(color: PurplePalette.textPrimary),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Theme.of(context).cardColor,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: Theme.of(context).dividerColor,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: Theme.of(context).dividerColor,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: Theme.of(context).primaryColor,
+                              width: 2,
+                            ),
+                          ),
+                        ),
                       ),
                       if (isSubmitting) ...[
                         const SizedBox(height: 16),
-                        const Center(
+                        Center(
                           child: CircularProgressIndicator(
-                            color: PurplePalette.accent,
+                            color: Theme.of(context).primaryColor,
                           ),
                         )
                       ]
@@ -177,6 +214,10 @@ class _FeedbackPageState extends State<FeedbackPage> {
                     : [
                         TextButton(
                           onPressed: () => Navigator.pop(dialogContext),
+                          style: TextButton.styleFrom(
+                            foregroundColor:
+                                Theme.of(context).colorScheme.onSurface,
+                          ),
                           child: const Text("Batal"),
                         ),
                         ElevatedButton(
@@ -197,21 +238,26 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
                             if (!mounted) return;
 
-                            Navigator.pop(
-                                dialogContext); // ⬅️ TUTUP DIALOG DULU
+                            Navigator.pop(dialogContext);
 
-                            await _loadFeedback(); // ⬅️ reload data
+                            await _loadFeedback();
 
-                            ScaffoldMessenger.of(pageContext)
-                                .showSnackBar(SnackBar(
-                              content: Text(result['message']),
-                              backgroundColor: result['success'] == true
-                                  ? Colors.green
-                                  : Colors.red,
-                            ));
+                            ScaffoldMessenger.of(pageContext).showSnackBar(
+                              SnackBar(
+                                content: Text(result['message']),
+                                backgroundColor: result['success'] == true
+                                    ? Colors.green
+                                    : Colors.red,
+                              ),
+                            );
                           },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).primaryColor,
+                            foregroundColor: Colors.white,
+                          ),
                           child: Text(
-                              existingFeedback != null ? "Simpan" : "Tambah"),
+                            existingFeedback != null ? "Simpan" : "Tambah",
+                          ),
                         )
                       ],
               ),
@@ -237,11 +283,11 @@ class _FeedbackPageState extends State<FeedbackPage> {
           child: StatefulBuilder(
             builder: (context, setDialogState) {
               return AlertDialog(
-                backgroundColor: PurplePalette.cardBackground,
+                backgroundColor: Theme.of(context).cardColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                   side: BorderSide(
-                    color: PurplePalette.lavender.withOpacity(0.3),
+                    color: Theme.of(context).primaryColor.withOpacity(0.3),
                   ),
                 ),
                 title: Row(
@@ -265,10 +311,10 @@ class _FeedbackPageState extends State<FeedbackPage> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Text(
+                    Text(
                       "Hapus Feedback",
                       style: TextStyle(
-                        color: PurplePalette.textPrimary,
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -278,17 +324,20 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       "Apakah Anda yakin ingin menghapus feedback?",
                       style: TextStyle(
-                        color: PurplePalette.textSecondary,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       "Tindakan ini tidak dapat dibatalkan.",
                       style: TextStyle(
-                        color: PurplePalette.textSecondary,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.7),
                         fontSize: 12,
                       ),
                     ),
@@ -303,86 +352,73 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   ],
                 ),
                 actions: _isDeletingLocal
-                    ? [] // Hilangkan tombol saat loading
+                    ? []
                     : [
                         TextButton(
                           onPressed: () {
                             Navigator.pop(context);
                           },
                           style: TextButton.styleFrom(
-                            foregroundColor: PurplePalette.textSecondary,
+                            foregroundColor:
+                                Theme.of(context).colorScheme.onSurface,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                               side: BorderSide(
-                                color: PurplePalette.mauve.withOpacity(0.5),
+                                color:
+                                    Theme.of(context).dividerColor,
                               ),
                             ),
                           ),
                           child: const Text("Batal"),
                         ),
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.red.withOpacity(0.8),
-                                Colors.redAccent.withOpacity(0.8),
-                              ],
-                            ),
-                          ),
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              setDialogState(() {
-                                _isDeletingLocal = true;
+                        ElevatedButton(
+                          onPressed: () async {
+                            setDialogState(() {
+                              _isDeletingLocal = true;
+                            });
+
+                            final result = await FeedbackService.deleteFeedback();
+
+                            Navigator.pop(context);
+
+                            if (!mounted) return;
+
+                            if (result['success'] == true) {
+                              setState(() {
+                                _isDeleting = false;
                               });
+                              await _loadFeedback();
 
-                              final result =
-                                  await FeedbackService.deleteFeedback();
-
-                              // Tutup dialog sebelum melakukan operasi yang melibatkan setState
-                              Navigator.pop(context);
-
-                              // Periksa apakah widget masih aktif sebelum melakukan setState
-                              if (!mounted) return;
-
-                              if (result['success'] == true) {
-                                setState(() {
-                                  _isDeleting = false;
-                                });
-                                await _loadFeedback();
-
-                                if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(result['message']),
-                                      backgroundColor: Colors.green,
-                                    ),
-                                  );
-                                }
-                              } else {
-                                setState(() {
-                                  _isDeleting = false;
-                                });
-                                if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(result['message']),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                }
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(result['message']),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
                               }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              foregroundColor: PurplePalette.textPrimary,
-                              shadowColor: Colors.transparent,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
+                            } else {
+                              setState(() {
+                                _isDeleting = false;
+                              });
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(result['message']),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Text("Hapus"),
                           ),
+                          child: const Text("Hapus"),
                         ),
                       ],
               );
@@ -402,14 +438,14 @@ class _FeedbackPageState extends State<FeedbackPage> {
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: PurplePalette.cardBackground,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: PurplePalette.lavender.withOpacity(0.3),
+          color: Theme.of(context).dividerColor,
         ),
         boxShadow: [
           BoxShadow(
-            color: PurplePalette.purple.withOpacity(0.2),
+            color: Theme.of(context).primaryColor.withOpacity(0.1),
             blurRadius: 15,
             spreadRadius: 2,
             offset: const Offset(0, 4),
@@ -429,8 +465,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   children: [
                     Text(
                       pengguna['nama_lengkap'],
-                      style: const TextStyle(
-                        color: PurplePalette.textPrimary,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -440,8 +476,11 @@ class _FeedbackPageState extends State<FeedbackPage> {
                     const SizedBox(height: 4),
                     Text(
                       pengguna['email'],
-                      style: const TextStyle(
-                        color: PurplePalette.textSecondary,
+                      style: TextStyle(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.7),
                         fontSize: 14,
                       ),
                       maxLines: 1,
@@ -458,16 +497,16 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: PurplePalette.lavender.withOpacity(0.2),
+                    color: Theme.of(context).primaryColor.withOpacity(0.2),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: PurplePalette.lavender,
+                      color: Theme.of(context).primaryColor,
                     ),
                   ),
-                  child: const Center(
+                  child: Center(
                     child: Icon(
                       FontAwesomeIcons.edit,
-                      color: PurplePalette.lavender,
+                      color: Theme.of(context).primaryColor,
                       size: 16,
                     ),
                   ),
@@ -494,14 +533,15 @@ class _FeedbackPageState extends State<FeedbackPage> {
                 starSpacing: 4,
                 maxValueVisibility: false,
                 valueLabelVisibility: false,
-                starColor: PurplePalette.orchid,
-                starOffColor: PurplePalette.mauve.withOpacity(0.5),
+                starColor: Theme.of(context).primaryColor,
+                starOffColor:
+                    Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
               ),
               const SizedBox(width: 8),
               Text(
                 "${feedback['rating']}.0",
-                style: const TextStyle(
-                  color: PurplePalette.textPrimary,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
@@ -514,8 +554,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
           // Review
           Text(
             feedback['review'],
-            style: const TextStyle(
-              color: PurplePalette.textPrimary,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 16,
               height: 1.5,
             ),
@@ -526,16 +566,16 @@ class _FeedbackPageState extends State<FeedbackPage> {
           // Tanggal
           Row(
             children: [
-              const Icon(
+              Icon(
                 FontAwesomeIcons.calendar,
-                color: PurplePalette.textSecondary,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                 size: 14,
               ),
               const SizedBox(width: 8),
               Text(
                 "Dibuat: ${_formatDate(feedback['created_at'])}",
-                style: const TextStyle(
-                  color: PurplePalette.textSecondary,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                   fontSize: 12,
                 ),
               ),
@@ -556,37 +596,37 @@ class _FeedbackPageState extends State<FeedbackPage> {
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: PurplePalette.cardBackground,
+              color: Theme.of(context).cardColor,
               shape: BoxShape.circle,
               border: Border.all(
-                color: PurplePalette.lavender.withOpacity(0.3),
+                color: Theme.of(context).primaryColor.withOpacity(0.3),
               ),
             ),
-            child: const Center(
+            child: Center(
               child: Icon(
                 FontAwesomeIcons.commentDots,
-                color: PurplePalette.lavender,
+                color: Theme.of(context).primaryColor,
                 size: 50,
               ),
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
+          Text(
             "Belum Ada Feedback",
             style: TextStyle(
-              color: PurplePalette.textPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 12),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 40),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Text(
               "Bagikan pengalaman Anda menggunakan aplikasi ini untuk membantu kami menjadi lebih baik",
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: PurplePalette.textSecondary,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                 fontSize: 14,
               ),
             ),
@@ -598,13 +638,13 @@ class _FeedbackPageState extends State<FeedbackPage> {
               borderRadius: BorderRadius.circular(16),
               gradient: LinearGradient(
                 colors: [
-                  PurplePalette.eggplant.withOpacity(0.8),
-                  PurplePalette.violet.withOpacity(0.8),
+                  Theme.of(context).primaryColor.withOpacity(0.8),
+                  Theme.of(context).primaryColor.withOpacity(0.6),
                 ],
               ),
               boxShadow: [
                 BoxShadow(
-                  color: PurplePalette.purple.withOpacity(0.3),
+                  color: Theme.of(context).primaryColor.withOpacity(0.3),
                   blurRadius: 15,
                   spreadRadius: 2,
                   offset: const Offset(0, 4),
@@ -617,7 +657,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.transparent,
-                foregroundColor: PurplePalette.textPrimary,
+                foregroundColor: Colors.white,
                 shadowColor: Colors.transparent,
                 minimumSize: const Size(double.infinity, 56),
                 shape: RoundedRectangleBorder(
@@ -652,7 +692,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
   String _formatDate(String dateString) {
     try {
       final date = DateTime.parse(dateString);
-      return "${date.day}/${date.month}/${date.year}";
+      return "${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}";
     } catch (e) {
       return dateString;
     }
@@ -660,10 +700,12 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
   @override
   Widget build(BuildContext context) {
+    Provider.of<ThemeProvider>(context);
+
     return Scaffold(
-      backgroundColor: PurplePalette.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: PurplePalette.cardBackground,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
         leading: IconButton(
           onPressed: () {
@@ -692,42 +734,40 @@ class _FeedbackPageState extends State<FeedbackPage> {
           ),
         ),
         centerTitle: true,
-        actions: _feedbackData != null
-            ? []
-            : [
-                if (!_isLoading)
-                  IconButton(
-                    onPressed: () {
-                      _showFeedbackDialog();
-                    },
-                    icon: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: PurplePalette.lavender,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          FontAwesomeIcons.plus,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                    ),
+        actions: [
+          if (_feedbackData == null && !_isLoading)
+            IconButton(
+              onPressed: () {
+                _showFeedbackDialog();
+              },
+              icon: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Center(
+                  child: Icon(
+                    FontAwesomeIcons.plus,
+                    color: Colors.white,
+                    size: 20,
                   ),
-              ],
+                ),
+              ),
+            ),
+        ],
       ),
       body: SafeArea(
         child: _isLoading
-            ? const Center(
+            ? Center(
                 child: CircularProgressIndicator(
-                  color: PurplePalette.accent,
+                  color: Theme.of(context).primaryColor,
                 ),
               )
             : RefreshIndicator(
-                color: PurplePalette.accent,
-                backgroundColor: PurplePalette.cardBackground,
+                color: Theme.of(context).primaryColor,
+                backgroundColor: Theme.of(context).cardColor,
                 onRefresh: _loadFeedback,
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -741,8 +781,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                           decoration: BoxDecoration(
                             color: Colors.red.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
-                            border:
-                                Border.all(color: Colors.red.withOpacity(0.3)),
+                            border: Border.all(color: Colors.red.withOpacity(0.3)),
                           ),
                           child: Row(
                             children: [
@@ -784,71 +823,46 @@ class _FeedbackPageState extends State<FeedbackPage> {
                             _buildFeedbackCard(),
                             const SizedBox(height: 16),
                             Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
                               child: _isDeleting
                                   ? Container(
                                       height: 56,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(16),
-                                        color: PurplePalette.cardBackground,
+                                        color: Theme.of(context).cardColor,
                                       ),
-                                      child: const Center(
+                                      child: Center(
                                         child: CircularProgressIndicator(
-                                          color: PurplePalette.accent,
+                                          color: Theme.of(context).primaryColor,
                                         ),
                                       ),
                                     )
-                                  : Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(16),
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            Colors.red.withOpacity(0.8),
-                                            Colors.redAccent.withOpacity(0.8),
-                                          ],
+                                  : ElevatedButton(
+                                      onPressed: _showDeleteConfirmation,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.red,
+                                        foregroundColor: Colors.white,
+                                        minimumSize: const Size(double.infinity, 56),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(16),
                                         ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.red.withOpacity(0.3),
-                                            blurRadius: 15,
-                                            spreadRadius: 2,
-                                            offset: const Offset(0, 4),
+                                      ),
+                                      child: const Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            FontAwesomeIcons.trash,
+                                            size: 20,
+                                          ),
+                                          SizedBox(width: 12),
+                                          Text(
+                                            "Hapus Feedback",
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
                                         ],
-                                      ),
-                                      child: ElevatedButton(
-                                        onPressed: _showDeleteConfirmation,
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.transparent,
-                                          foregroundColor:
-                                              PurplePalette.textPrimary,
-                                          shadowColor: Colors.transparent,
-                                          minimumSize:
-                                              const Size(double.infinity, 56),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(16),
-                                          ),
-                                        ),
-                                        child: const Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              FontAwesomeIcons.trash,
-                                              size: 20,
-                                            ),
-                                            SizedBox(width: 12),
-                                            Text(
-                                              "Hapus Feedback",
-                                              style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
                                       ),
                                     ),
                             ),
